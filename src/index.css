@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* OKLCH only. No pure black, no pure white. Neutrals tinted toward the
+     amber accent hue (~50). Chroma tapers as L nears 0 or 1. One fire accent. */
+  --bg:     oklch(0.155 0.012 50);   /* near black, warm */
+  --ink:    oklch(0.940 0.008 70);   /* near white, warm, low chroma */
+  --muted:  oklch(0.620 0.016 50);   /* quiet warm grey */
+  --accent: oklch(0.685 0.190 45);   /* glowing amber resin / fire */
+
+  --bg-lift:  oklch(0.205 0.014 50);
+  --hairline: oklch(0.300 0.012 50);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+}
