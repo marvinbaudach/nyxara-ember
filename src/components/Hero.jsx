@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
-const SRC = '/assets/hero.mp4'
+const SRC = 'assets/hero.mp4'
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
 // Ambient cinematic hero. The driving take is a single continuous shot, so its
@@ -51,7 +51,7 @@ export default function Hero() {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-bg">
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" poster="/assets/g3.jpg" />
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" poster="assets/g3.jpg" />
       <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="auto" />
 
       {/* soft dark contrast halo so the wordmark never washes out */}

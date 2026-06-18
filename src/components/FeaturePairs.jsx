@@ -48,7 +48,7 @@ export default function FeaturePairs() {
   return (
     <section className="relative flex flex-col gap-[clamp(4rem,10vh,10rem)] px-[8vw] py-[clamp(4rem,9vh,9rem)]">
       <FeatureBlock
-        img="/assets/g1.jpg"
+        img="assets/g1.jpg"
         alt="The Ember low inside a dark concrete tunnel at night"
         caption={<>1340 horses, <span className="text-accent">unleashed</span></>}
         heading="Born in the dark"
@@ -56,7 +56,7 @@ export default function FeaturePairs() {
       />
       <FeatureBlock
         reverse
-        img="/assets/g2.jpg"
+        img="assets/g2.jpg"
         alt="Macro of the rear exhaust nozzles and glowing light blade"
         caption={<>Four metre <span className="text-accent">flame</span></>}
         heading="Fire on command"
