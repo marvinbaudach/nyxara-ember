@@ -1,27 +1,30 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { ease } from '../anim'
 
 const SRC = 'assets/hero.mp4'
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
+type HeroProps = { onReady?: () => void }
+
 // Ambient cinematic hero. The driving take is a single continuous shot, so its
 // first and last frames differ; a hard loop would visibly jump. Two stacked
 // video layers crossfade into each other at the boundary to hide the restart.
-export default function Hero({ onReady }) {
-  const aRef = useRef(null)
-  const bRef = useRef(null)
+export default function Hero({ onReady }: HeroProps) {
+  const aRef = useRef<HTMLVideoElement>(null)
+  const bRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const a = aRef.current
     const b = bRef.current
     if (!a || !b) return
 
-    let active = a
-    let idle = b
+    let active: HTMLVideoElement = a
+    let idle: HTMLVideoElement = b
     let swapping = false
     let raf = 0
 
-    const kick = (v) => v.play().catch(() => {})
+    const kick = (v: HTMLVideoElement) => v.play().catch(() => {})
     kick(a)
 
     // Tell the app the hero is showing real frames so the loader can lift.
@@ -40,7 +43,7 @@ export default function Hero({ onReady }) {
         const tmp = active
         active = idle
         idle = tmp
-        setTimeout(() => { swapping = false }, FADE * 1000)
+        window.setTimeout(() => { swapping = false }, FADE * 1000)
       }
       raf = requestAnimationFrame(tick)
     }
@@ -50,7 +53,7 @@ export default function Hero({ onReady }) {
     window.addEventListener('pointerdown', onTouch)
 
     return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
-  }, [])
+  }, [onReady])
 
   const layer = 'absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-[800ms] ease-linear'
 
@@ -71,7 +74,7 @@ export default function Hero({ onReady }) {
       <motion.div
         initial={{ opacity: 0, y: 26 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.1, ease }}
         className="absolute inset-0 z-20 grid place-items-center px-[6vw] text-center"
       >
         <div>

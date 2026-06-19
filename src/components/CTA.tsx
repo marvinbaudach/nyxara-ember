@@ -1,14 +1,17 @@
 import { useRef, useState } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 
 // Premium button reflex: a radial specular sheen tracks the cursor across the
 // button surface, computed from live mouse coordinates.
-function SheenButton({ children }) {
-  const ref = useRef(null)
-  const [pos, setPos] = useState({ x: 50, y: 50 })
+function SheenButton({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [lit, setLit] = useState(false)
 
-  const onMove = (e) => {
-    const r = ref.current.getBoundingClientRect()
+  const onMove = (e: MouseEvent<HTMLButtonElement>) => {
+    const el = ref.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
     setPos({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 })
   }
 

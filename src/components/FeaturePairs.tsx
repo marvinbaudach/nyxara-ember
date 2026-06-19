@@ -1,11 +1,20 @@
+import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import { ease } from '../anim'
 
-const ease = [0.22, 1, 0.36, 1]
+type FeatureBlockProps = {
+  img: string
+  alt: string
+  caption: ReactNode
+  heading: string
+  body: string
+  reverse?: boolean
+}
 
 // Horizontal structural build-up: the image is revealed by a clip-path that
 // sweeps open horizontally as the block enters the viewport. Uses whileInView
 // (no scroll-linked measurement) so it stays smooth and warning free.
-function FeatureBlock({ img, alt, caption, heading, body, reverse }) {
+function FeatureBlock({ img, alt, caption, heading, body, reverse }: FeatureBlockProps) {
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
 

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { ease } from '../anim'
 
 // Full-screen branded loading veil. Stays until the hero video is actually
 // playing, so the visitor never sees the poster image pop to video.
@@ -7,7 +8,7 @@ export default function Preloader() {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.8, ease }}
       className="fixed inset-0 z-50 grid place-items-center bg-bg"
     >
       <div className="text-center">

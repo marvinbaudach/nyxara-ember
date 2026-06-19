@@ -2,7 +2,7 @@
 // images and 2 videos, each used once. g1 and g2 live in FeaturePairs, so this
 // band pairs the remaining still (g3.jpg) with the reveal video (middle.mp4) as
 // an asymmetric two-panel strip rather than reusing a frame.
-import LazyVideo from './LazyVideo.jsx'
+import LazyVideo from './LazyVideo'
 
 export default function GalleryBand() {
   return (
