@@ -22,6 +22,8 @@ function FeatureBlock({ img, alt, caption, heading, body, reverse }) {
         <motion.img
           src={img}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           variants={{ hidden: { clipPath: from, scale: 1.06 }, show: { clipPath: to, scale: 1 } }}
           transition={{ duration: 1.1, ease }}
           className="block aspect-[9/12] w-full object-cover"

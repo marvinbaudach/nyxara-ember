@@ -7,7 +7,7 @@ const FADE = 0.8 // seconds of crossfade at the loop boundary
 // Ambient cinematic hero. The driving take is a single continuous shot, so its
 // first and last frames differ; a hard loop would visibly jump. Two stacked
 // video layers crossfade into each other at the boundary to hide the restart.
-export default function Hero() {
+export default function Hero({ onReady }) {
   const aRef = useRef(null)
   const bRef = useRef(null)
 
@@ -23,6 +23,11 @@ export default function Hero() {
 
     const kick = (v) => v.play().catch(() => {})
     kick(a)
+
+    // Tell the app the hero is showing real frames so the loader can lift.
+    const signalReady = () => onReady?.()
+    a.addEventListener('playing', signalReady, { once: true })
+    a.addEventListener('canplaythrough', signalReady, { once: true })
 
     const tick = () => {
       const v = active
