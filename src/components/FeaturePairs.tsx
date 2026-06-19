@@ -35,7 +35,7 @@ function FeatureBlock({ img, alt, caption, heading, body, reverse }: FeatureBloc
           decoding="async"
           variants={{ hidden: { clipPath: from, scale: 1.06 }, show: { clipPath: to, scale: 1 } }}
           transition={{ duration: 1.1, ease }}
-          className="block aspect-[9/12] w-full object-cover"
+          className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
         />
         <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.85)] to-transparent p-6 font-sans text-[clamp(0.95rem,1.6vw,1.2rem)] font-medium">
           {caption}
