@@ -6,6 +6,7 @@ import Hero from './components/Hero'
 import ThesisCallout from './components/ThesisCallout'
 import FeaturePairs from './components/FeaturePairs'
 import GalleryBand from './components/GalleryBand'
+import SpinViewer from './components/SpinViewer'
 import DetailRows from './components/DetailRows'
 import CTA from './components/CTA'
 import Footer from './components/Footer'
@@ -43,6 +44,7 @@ export default function App() {
         <ThesisCallout />
         <FeaturePairs />
         <GalleryBand />
+        <SpinViewer />
         <DetailRows />
         <CTA />
         <Footer />
