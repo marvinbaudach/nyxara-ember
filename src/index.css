@@ -1,6 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-bg-lift: var(--bg-lift);
+  --color-hairline: var(--hairline);
+
+  --font-display: 'Bodoni Moda', Georgia, serif;
+  --font-sans: Inter, system-ui, sans-serif;
+}
 
 :root {
   /* OKLCH only. No pure black, no pure white. Neutrals tinted toward the
