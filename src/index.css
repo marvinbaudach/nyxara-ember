@@ -40,3 +40,21 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
 }
+
+/* Turntable stage — a slow-breathing ember glow behind the transparent WebGL
+   canvas, so the car sits in a pool of warm light instead of a flat panel. */
+.ember-stage {
+  background:
+    radial-gradient(120% 90% at 50% 78%, oklch(0.30 0.10 48 / 0.55), transparent 60%),
+    radial-gradient(140% 120% at 50% 30%, oklch(0.19 0.03 50), oklch(0.12 0.012 50) 70%);
+  animation: ember-breathe 9s ease-in-out infinite;
+}
+
+@keyframes ember-breathe {
+  0%, 100% { background-size: 100% 100%, 100% 100%; filter: brightness(1); }
+  50%      { background-size: 116% 108%, 100% 100%; filter: brightness(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ember-stage { animation: none; }
+}
