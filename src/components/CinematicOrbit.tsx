@@ -47,6 +47,11 @@ const CinematicOrbit = () => {
     if (!video || !track) return
 
     let raf = 0
+    // Force the first frame to paint as soon as data is ready so the poster
+    // gives way to actual footage — otherwise, while progress sits at ~0 the
+    // seek threshold below is never crossed, no frame decodes, and the poster
+    // lingers until the visitor has scrolled well into the section.
+    let primed = false
     const tick = () => {
       const duration = video.duration
       if (duration && Number.isFinite(duration)) {
@@ -57,8 +62,14 @@ const CinematicOrbit = () => {
         const target = progress * (duration - 0.05)
         const cur = video.currentTime
         const next = cur + (target - cur) * 0.15
-        if (Math.abs(target - cur) > 0.004 && video.readyState >= 2) {
-          video.currentTime = next
+        if (video.readyState >= 2) {
+          if (!primed) {
+            // Nudge currentTime so the decoder paints a frame over the poster.
+            video.currentTime = Math.max(target, 0.001)
+            primed = true
+          } else if (Math.abs(target - cur) > 0.004) {
+            video.currentTime = next
+          }
         }
       }
       raf = requestAnimationFrame(tick)
