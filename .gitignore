@@ -2,3 +2,6 @@ node_modules
 dist
 *.log
 .DS_Store
+
+# husky internals (the hooks themselves in .husky/ are committed)
+.husky/_

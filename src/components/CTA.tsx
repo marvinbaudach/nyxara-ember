@@ -3,7 +3,7 @@ import type { MouseEvent, ReactNode } from 'react'
 
 // Premium button reflex: a radial specular sheen tracks the cursor across the
 // button surface, computed from live mouse coordinates.
-function SheenButton({ children }: { children: ReactNode }) {
+const SheenButton = ({ children }: { children: ReactNode }) => {
   const ref = useRef<HTMLButtonElement>(null)
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [lit, setLit] = useState(false)
@@ -19,8 +19,8 @@ function SheenButton({ children }: { children: ReactNode }) {
     <button
       ref={ref}
       onMouseMove={onMove}
-      onMouseEnter={() => setLit(true)}
-      onMouseLeave={() => setLit(false)}
+      onMouseEnter={() => { setLit(true); }}
+      onMouseLeave={() => { setLit(false); }}
       className="group relative overflow-hidden rounded-full border border-accent/40 bg-bg-lift px-12 py-5 font-sans text-[1.05rem] font-medium tracking-[0.02em] text-ink transition-colors"
     >
       <span
@@ -36,7 +36,7 @@ function SheenButton({ children }: { children: ReactNode }) {
   )
 }
 
-export default function CTA() {
+const CTA = () => {
   return (
     <section className="relative px-[8vw] py-[clamp(7rem,16vh,16rem)] text-center">
       <p className="font-sans text-[0.78rem] uppercase tracking-[0.42em] text-muted">Reservations open</p>
@@ -52,3 +52,5 @@ export default function CTA() {
     </section>
   )
 }
+
+export default CTA

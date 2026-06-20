@@ -9,15 +9,16 @@ import { useGLTF } from '@react-three/drei'
 // amber/fire identity instead of the original chrome-yellow showroom car.
 const URL = './assets/lambo.glb'
 
-export function CarModel(props: Omit<React.ComponentProps<'primitive'>, 'object'>) {
+export const CarModel = (props: Omit<React.ComponentProps<'primitive'>, 'object'>) => {
   const { scene, nodes, materials } = useGLTF(URL)
 
   useMemo(() => {
     // Original normals look deformed (likely from compression) — recompute on
     // the glass meshes so the windows refract cleanly.
     Object.values(nodes).forEach((node) => {
-      const mesh = node as THREE.Mesh
-      if (mesh.isMesh && mesh.name.startsWith('glass')) mesh.geometry.computeVertexNormals()
+      if (node instanceof THREE.Mesh && node.name.startsWith('glass')) {
+        (node.geometry as THREE.BufferGeometry).computeVertexNormals()
+      }
     })
     // Fix inner frame, too light.
     applyProps(materials.FrameBlack, { metalness: 0.75, roughness: 0, color: 'black' })
@@ -31,7 +32,8 @@ export function CarModel(props: Omit<React.ComponentProps<'primitive'>, 'object'
     applyProps(materials.LightsFrontLed, { emissiveIntensity: 4, toneMapped: false })
     // Body paint — amber resin over a deep base, deep clearcoat for wet shine.
     // Inset the side windows a touch so they sit flush in the frame.
-    if (nodes['glass_003']) nodes['glass_003'].scale.setScalar(2.7)
+    const glassNode = nodes.glass_003 as THREE.Object3D | undefined
+    if (glassNode) glassNode.scale.setScalar(2.7)
     const body = nodes.yellow_WhiteCar_0 as THREE.Mesh | undefined
     if (body) {
       applyProps(body, {

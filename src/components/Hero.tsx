@@ -5,7 +5,7 @@ import { ease } from '../anim'
 const SRC = 'assets/hero.mp4'
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
-type HeroProps = { onReady?: () => void }
+interface HeroProps { onReady?: () => void }
 
 // Ambient cinematic hero. The driving take is a single continuous shot, so its
 // first and last frames differ; a hard loop would visibly jump. Two stacked
@@ -25,7 +25,7 @@ export default function Hero({ onReady }: HeroProps) {
     let raf = 0
 
     const kick = (v: HTMLVideoElement) => v.play().catch(() => {})
-    kick(a)
+    void kick(a)
 
     // Tell the app the hero is showing real frames so the loader can lift.
     const signalReady = () => onReady?.()
@@ -37,7 +37,7 @@ export default function Hero({ onReady }: HeroProps) {
       if (v.duration && !swapping && v.duration - v.currentTime <= FADE) {
         swapping = true
         idle.currentTime = 0
-        kick(idle)
+        void kick(idle)
         idle.style.opacity = '1'
         v.style.opacity = '0'
         const tmp = active
@@ -49,7 +49,7 @@ export default function Hero({ onReady }: HeroProps) {
     }
     raf = requestAnimationFrame(tick)
 
-    const onTouch = () => { kick(active); window.removeEventListener('pointerdown', onTouch) }
+    const onTouch = () => { void kick(active); window.removeEventListener('pointerdown', onTouch) }
     window.addEventListener('pointerdown', onTouch)
 
     return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }

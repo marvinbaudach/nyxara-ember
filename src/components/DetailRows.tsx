@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
 
-type Row = { n: string; h: string; t: string }
+interface Row { n: string; h: string; t: string }
 
 const rows: Row[] = [
   {

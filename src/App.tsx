@@ -21,8 +21,8 @@ export default function App() {
 
   // Safety net: never trap the visitor behind the loader.
   useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), 6000)
-    return () => window.clearTimeout(t)
+    const t = window.setTimeout(() => { setReady(true); }, 6000)
+    return () => { window.clearTimeout(t); }
   }, [])
 
   // Smooth inertia scroll, started once the experience is revealed.
@@ -40,7 +40,7 @@ export default function App() {
     <>
       <AnimatePresence>{!ready && <Preloader key="preloader" />}</AnimatePresence>
       <main className="bg-bg text-ink">
-        <Hero onReady={() => setReady(true)} />
+        <Hero onReady={() => { setReady(true); }} />
         <ThesisCallout />
         <FeaturePairs />
         <GalleryBand />

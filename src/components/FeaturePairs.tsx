@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
 
-type FeatureBlockProps = {
+interface FeatureBlockProps {
   img: string
   alt: string
   caption: ReactNode
@@ -14,7 +14,7 @@ type FeatureBlockProps = {
 // Horizontal structural build-up: the image is revealed by a clip-path that
 // sweeps open horizontally as the block enters the viewport. Uses whileInView
 // (no scroll-linked measurement) so it stays smooth and warning free.
-function FeatureBlock({ img, alt, caption, heading, body, reverse }: FeatureBlockProps) {
+const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBlockProps) => {
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
 
@@ -55,7 +55,7 @@ function FeatureBlock({ img, alt, caption, heading, body, reverse }: FeatureBloc
   )
 }
 
-export default function FeaturePairs() {
+const FeaturePairs = () => {
   return (
     <section className="relative flex flex-col gap-[clamp(4rem,10vh,10rem)] px-[8vw] py-[clamp(4rem,9vh,9rem)]">
       <FeatureBlock
@@ -76,3 +76,5 @@ export default function FeaturePairs() {
     </section>
   )
 }
+
+export default FeaturePairs

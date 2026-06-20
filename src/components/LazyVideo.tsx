@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-type LazyVideoProps = {
+interface LazyVideoProps {
   src: string
   poster?: string
   className?: string
@@ -24,7 +24,7 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
       { rootMargin: '300px 0px' },
     )
     io.observe(v)
-    return () => io.disconnect()
+    return () => { io.disconnect(); }
   }, [])
 
   return (

@@ -7,7 +7,7 @@ import { CarModel } from './CarModel'
 
 // A single-point progress readout for the model loader, rendered inside the
 // Canvas so drei's <Html> can portal it onto the viewer plane.
-function Loader() {
+const Loader = () => {
   const { progress } = useProgress()
   return (
     <Html center>
@@ -18,7 +18,7 @@ function Loader() {
   )
 }
 
-function Scene() {
+const Scene = () => {
   return (
     <>
       <hemisphereLight intensity={0.45} />
@@ -56,7 +56,7 @@ function Scene() {
           intensity={9}
           scale={2}
           position={[10, 5, 10]}
-          onUpdate={(self) => self.lookAt(0, 0, 0)}
+          onUpdate={(self) => { self.lookAt(0, 0, 0); }}
         />
       </Environment>
 
@@ -79,7 +79,7 @@ function Scene() {
   )
 }
 
-export default function SpinViewer() {
+const SpinViewer = () => {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(false)
 
@@ -96,7 +96,7 @@ export default function SpinViewer() {
       { rootMargin: '300px 0px' },
     )
     io.observe(el)
-    return () => io.disconnect()
+    return () => { io.disconnect(); }
   }, [])
 
   return (
@@ -137,3 +137,5 @@ export default function SpinViewer() {
     </section>
   )
 }
+
+export default SpinViewer
