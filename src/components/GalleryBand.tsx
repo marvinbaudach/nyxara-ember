@@ -22,7 +22,7 @@ export default function GalleryBand() {
       <figure className="relative overflow-hidden bg-bg">
         <LazyVideo
           src="assets/middle.mp4"
-          poster="assets/g2.jpg"
+          poster="assets/middle_poster.jpg"
           className="block h-[clamp(340px,68vh,720px)] w-full object-cover"
         />
         <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.85)] to-transparent p-6 font-sans text-[clamp(0.9rem,1.4vw,1.1rem)] font-medium tracking-[0.02em] text-muted">
