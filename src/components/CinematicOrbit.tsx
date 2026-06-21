@@ -88,7 +88,13 @@ const CinematicOrbit = () => {
       <div className="ember-stage sticky top-0 h-screen w-full overflow-hidden">
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover"
+          // Mobile: the clip is landscape and the stage is a tall portrait
+          // viewport — object-cover would scale up and slice the car's sides
+          // off, which is exactly the silhouette this section sells. Letterbox
+          // it instead (object-contain, vertically centered) so every angle
+          // stays in frame; the dark stage + vignette read as an intentional
+          // cinematic frame. Desktop aspect ratios are close enough to fill.
+          className="absolute inset-0 h-full w-full object-contain md:object-cover"
           src={SRC}
           poster={POSTER}
           muted
