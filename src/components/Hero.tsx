@@ -55,10 +55,25 @@ export default function Hero({ onReady }: HeroProps) {
     return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
   }, [onReady])
 
-  const layer = 'absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-[800ms] ease-linear'
+  // Landscape footage in a portrait phone viewport: object-cover would zoom to
+  // fill height and crop the car's length away. On portrait we switch the sharp
+  // layers to object-contain (whole car visible) and fill the would-be empty
+  // bars with a blurred, scaled copy of the same clip — cinematic, no dead space.
+  const layer = 'absolute inset-0 z-0 h-full w-full object-cover portrait:object-contain transition-opacity duration-[800ms] ease-linear'
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-bg">
+      {/* Blurred fill behind the contained video — portrait only. */}
+      <video
+        className="absolute inset-0 z-0 hidden h-full w-full scale-110 object-cover brightness-[0.55] blur-2xl portrait:block"
+        src={SRC}
+        muted
+        loop
+        autoPlay
+        playsInline
+        preload="auto"
+        aria-hidden
+      />
       <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" poster="assets/g3.jpg" />
       <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="auto" />
 
