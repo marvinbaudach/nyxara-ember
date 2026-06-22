@@ -12,6 +12,13 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+// Touch-primary device with no mouse/trackpad — i.e. a real phone/tablet whose
+// video decoder seeks slowly. Drives the coarse-grained, seek-gated scrub path.
+const isCoarsePointer = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(pointer: coarse)').matches &&
+  !window.matchMedia('(any-pointer: fine)').matches
+
 const CinematicOrbit = () => {
   const trackRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -46,36 +53,59 @@ const CinematicOrbit = () => {
     const track = trackRef.current
     if (!video || !track) return
 
+    const coarse = isCoarsePointer()
     let raf = 0
     // Force the first frame to paint as soon as data is ready so the poster
     // gives way to actual footage — otherwise, while progress sits at ~0 the
     // seek threshold below is never crossed, no frame decodes, and the poster
     // lingers until the visitor has scrolled well into the section.
     let primed = false
+    // Mobile decoders can only service one seek at a time; firing a fresh
+    // currentTime every frame queues seeks faster than they complete and the
+    // section stutters. Gate on the decoder: only issue the next seek once the
+    // previous one has reported `seeked`. Cleared by the listener below.
+    let seeking = false
+    const onSeeked = () => { seeking = false; }
+    if (coarse) video.addEventListener('seeked', onSeeked)
+
+    // Skip negligible seeks. Coarse devices use a far larger deadband (~1/24s,
+    // roughly a frame) so a steady scroll produces a handful of seeks per second
+    // instead of 60 — smooth on the decoder, still tracks the scroll.
+    const deadband = coarse ? 0.04 : 0.004
+
     const tick = () => {
       const duration = video.duration
-      if (duration && Number.isFinite(duration)) {
+      if (duration && Number.isFinite(duration) && video.readyState >= 2) {
         const rect = track.getBoundingClientRect()
         const total = rect.height - window.innerHeight
         const scrolled = Math.min(Math.max(-rect.top, 0), Math.max(total, 1))
         const progress = total > 0 ? scrolled / total : 0
         const target = progress * (duration - 0.05)
         const cur = video.currentTime
-        const next = cur + (target - cur) * 0.15
-        if (video.readyState >= 2) {
-          if (!primed) {
-            // Nudge currentTime so the decoder paints a frame over the poster.
-            video.currentTime = Math.max(target, 0.001)
-            primed = true
-          } else if (Math.abs(target - cur) > 0.004) {
-            video.currentTime = next
+
+        if (!primed) {
+          // Nudge currentTime so the decoder paints a frame over the poster.
+          video.currentTime = Math.max(target, 0.001)
+          primed = true
+        } else if (coarse) {
+          // Snap straight to target (no easing — easing would mean a stream of
+          // micro-seeks the decoder can't keep up with) and only when idle.
+          if (!seeking && Math.abs(target - cur) > deadband) {
+            seeking = true
+            video.currentTime = target
           }
+        } else if (Math.abs(target - cur) > deadband) {
+          // Desktop seeks fast enough to ease for buttery-smooth scrubbing.
+          video.currentTime = cur + (target - cur) * 0.15
         }
       }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => { cancelAnimationFrame(raf); }
+    return () => {
+      cancelAnimationFrame(raf)
+      if (coarse) video.removeEventListener('seeked', onSeeked)
+    }
   }, [active])
 
   return (
