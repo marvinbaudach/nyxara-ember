@@ -13,9 +13,6 @@ interface HeroProps { onReady?: () => void }
 export default function Hero({ onReady }: HeroProps) {
   const aRef = useRef<HTMLVideoElement>(null)
   const bRef = useRef<HTMLVideoElement>(null)
-  // Dedicated audio bed: the visible layers stay muted (crossfading them would
-  // echo the soundtrack), so one hidden looping copy carries the sound.
-  const audioRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const a = aRef.current
@@ -52,25 +49,10 @@ export default function Hero({ onReady }: HeroProps) {
     }
     raf = requestAnimationFrame(tick)
 
-    // Start the audio bed muted (autoplay only succeeds while muted), then
-    // unmute it on the first user gesture — browsers block audible autoplay.
-    const audio = audioRef.current
-    if (audio) void kick(audio)
+    const onTouch = () => { void kick(active); window.removeEventListener('pointerdown', onTouch) }
+    window.addEventListener('pointerdown', onTouch)
 
-    const enableSound = () => {
-      if (audio) { audio.muted = false; void kick(audio) }
-      void kick(active)
-      window.removeEventListener('pointerdown', enableSound)
-      window.removeEventListener('wheel', enableSound)
-    }
-    window.addEventListener('pointerdown', enableSound)
-    window.addEventListener('wheel', enableSound, { passive: true })
-
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('pointerdown', enableSound)
-      window.removeEventListener('wheel', enableSound)
-    }
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
   }, [onReady])
 
   // Landscape footage in a portrait phone viewport: object-cover would zoom to
@@ -94,20 +76,6 @@ export default function Hero({ onReady }: HeroProps) {
       />
       <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" poster="assets/g3.jpg" />
       <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="auto" />
-
-      {/* Hidden audio bed — carries the soundtrack so the crossfading visual
-          layers can stay muted. Unmuted on first interaction. */}
-      <video
-        ref={audioRef}
-        className="pointer-events-none absolute h-px w-px opacity-0"
-        src={SRC}
-        loop
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden
-        tabIndex={-1}
-      />
 
       {/* soft dark contrast halo so the wordmark never washes out */}
       <div
