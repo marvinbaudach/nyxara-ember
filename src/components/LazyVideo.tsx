@@ -10,8 +10,8 @@ interface LazyVideoProps {
 //   1. A wide pre-buffer margin begins downloading the file well before it
 //      scrolls in (preload kicks off via load()), so bytes are already in
 //      flight by the time it appears.
-//   2. A tight play margin starts/stops playback only when actually near the
-//      viewport, so we never decode offscreen.
+//   2. Playback starts from the first frame the moment the element is ~35%
+//      visible, so the reveal is synced to the visitor scrolling onto it.
 // Files must be muxed with faststart (moov atom up front) for this to pay off —
 // otherwise the browser still waits for the whole download before the 1st frame.
 export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
@@ -35,14 +35,20 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
     )
     preBuffer.observe(v)
 
+    // Start the reveal from its first frame exactly when the panel scrolls into
+    // view (not before), so the motion is synced to the visitor arriving on it.
     const playback = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) v.play().catch(() => {})
-          else v.pause()
+          if (e.isIntersecting) {
+            v.currentTime = 0
+            v.play().catch(() => {})
+          } else {
+            v.pause()
+          }
         }
       },
-      { rootMargin: '200px 0px' },
+      { threshold: 0.35 },
     )
     playback.observe(v)
 
