@@ -5,3 +5,6 @@ dist
 
 # husky internals (the hooks themselves in .husky/ are committed)
 .husky/_
+
+# local asset backups (not for VCS)
+_backup_vid/
