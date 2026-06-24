@@ -1,0 +1,37 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- warm near-black tile, matches the bg token oklch(0.155 0.012 50) -->
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#241b14"/>
+      <stop offset="1" stop-color="#16100b"/>
+    </linearGradient>
+    <!-- live-coal glow behind the flame -->
+    <radialGradient id="halo" cx="16" cy="19" r="13" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff8a2e" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#e2752f" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#e2752f" stop-opacity="0"/>
+    </radialGradient>
+    <!-- flame body: deep amber base rising to a hot near-white core -->
+    <linearGradient id="flame" x1="16" y1="4" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd27a"/>
+      <stop offset="0.45" stop-color="#ff9a3d"/>
+      <stop offset="1" stop-color="#d65f25"/>
+    </linearGradient>
+    <radialGradient id="core" cx="16" cy="20.5" r="5.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff6e0"/>
+      <stop offset="0.55" stop-color="#ffca6a"/>
+      <stop offset="1" stop-color="#ffca6a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="32" height="32" rx="8" fill="url(#tile)"/>
+  <rect width="32" height="32" rx="8" fill="url(#halo)"/>
+
+  <!-- outer flame: a tapered ember tongue with an inner curl -->
+  <path d="M16 3.5c3.4 4.6 5.2 7.6 4.4 11 2.6-1.4 3.4 2.4 2.4 5.2C25.6 22 25 27 20.4 28.3c-5.2 1.5-10.2-1.4-11-6.4-.6-3.7 1.3-6.2 3-8.4.2 2.1 1.3 3 2.6 2.7 1.7-.4 1.8-2.7.6-4.7C13.9 8.7 14.6 6 16 3.5Z"
+        fill="url(#flame)"/>
+
+  <!-- hot core -->
+  <path d="M16.4 14.4c2 2.3 3 4.3 2.6 6.3-.5 2.6-2.6 4.3-5 4-2.4-.3-4-2.4-3.7-4.9.2-1.7 1.1-2.8 2-3.9.3 1.4 1 2 1.8 1.8 1-.3 1.2-1.6.7-2.9-.2-.5-.3-.9-.3-1.4l1.9.9Z"
+        fill="url(#core)"/>
+</svg>
