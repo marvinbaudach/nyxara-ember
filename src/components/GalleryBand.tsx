@@ -1,29 +1,15 @@
-// Seamless horizontal viewport strip. Note: the asset budget is exactly 3
-// images and 2 videos, each used once. g1 and g2 live in FeaturePairs, so this
-// band pairs the remaining still (g3.jpg) with the reveal video (middle.mp4) as
-// an asymmetric two-panel strip rather than reusing a frame.
+// Full-bleed reveal band. The still (g3.jpg) was dropped — it duplicated the
+// orbit video's source frame — so this strip is now a single edge-to-edge video.
 import LazyVideo from './LazyVideo'
 
 export default function GalleryBand() {
   return (
-    <section aria-label="The Ember up close" className="grid grid-cols-1 gap-[2px] border-y border-hairline bg-hairline md:grid-cols-[1fr_0.8fr]">
-      <figure className="relative overflow-hidden bg-bg">
-        <img
-          src="assets/g3.jpg"
-          alt="The Ember hero pose in the dark showroom"
-          loading="lazy"
-          decoding="async"
-          className="block h-[clamp(280px,42vh,720px)] w-full object-cover md:h-[clamp(340px,68vh,720px)]"
-        />
-        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em]">
-          Ninety nine will <span className="text-accent">exist</span>
-        </figcaption>
-      </figure>
-      <figure className="relative overflow-hidden bg-bg">
+    <section aria-label="The Ember up close" className="border-y border-hairline bg-bg">
+      <figure className="relative overflow-hidden">
         <LazyVideo
           src="assets/middle.mp4"
           poster="assets/middle_poster.jpg"
-          className="block h-[clamp(280px,42vh,720px)] w-full object-cover md:h-[clamp(340px,68vh,720px)]"
+          className="block h-[clamp(280px,52vh,820px)] w-full object-cover md:h-[clamp(360px,78vh,900px)]"
         />
         <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em] text-muted">
           Every angle, <span className="text-accent">revealed</span>
