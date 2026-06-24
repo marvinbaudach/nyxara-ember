@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ease } from '../anim'
 
 const SRC = 'assets/hero.mp4'
+const POSTER = 'assets/hero_poster.jpg' // first frame — shown until decode catches up
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
 interface HeroProps { onReady?: () => void }
@@ -63,19 +64,26 @@ export default function Hero({ onReady }: HeroProps) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-bg">
-      {/* Blurred fill behind the contained video — portrait only. */}
+      {/* Blurred fill behind the contained video — portrait only. Decorative, so
+          it loads at metadata priority (it is display:none on landscape) and
+          never competes with layer A for the first playable frame. */}
       <video
         className="absolute inset-0 z-0 hidden h-full w-full scale-110 object-cover brightness-[0.55] blur-2xl portrait:block"
         src={SRC}
+        poster={POSTER}
         muted
         loop
         autoPlay
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden
       />
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" />
-      <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="auto" />
+      {/* Layer A reveals first — gets full preload priority and a poster so the
+          frame is visible the instant the loader lifts, before decode catches up. */}
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} poster={POSTER} muted playsInline preload="auto" />
+      {/* Layer B only matters near the first loop boundary (~7s in), by which time
+          A has buffered the same file. preload="none" keeps it off the critical path. */}
+      <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="none" />
 
       {/* soft dark contrast halo so the wordmark never washes out */}
       <div
