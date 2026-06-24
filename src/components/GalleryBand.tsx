@@ -4,7 +4,7 @@ import LazyVideo from './LazyVideo'
 
 export default function GalleryBand() {
   return (
-    <section aria-label="The Ember up close" className="border-y border-hairline bg-bg">
+    <section aria-label="The Ember up close" className="relative z-50 border-y border-hairline bg-bg">
       <figure className="relative overflow-hidden">
         <LazyVideo
           src="assets/middle.mp4"

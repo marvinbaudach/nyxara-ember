@@ -112,7 +112,7 @@ const CinematicOrbit = () => {
     <section
       ref={trackRef}
       aria-label="Cinematic orbit — fly around the Ember"
-      className="relative h-[200vh] border-y border-hairline bg-bg md:h-[300vh]"
+      className="relative z-50 h-[200vh] border-y border-hairline bg-bg md:h-[300vh]"
     >
       {/* Sticky stage holds the viewport-filling clip while the tall track scrolls. */}
       <div className="ember-stage sticky top-0 h-screen w-full overflow-hidden">
