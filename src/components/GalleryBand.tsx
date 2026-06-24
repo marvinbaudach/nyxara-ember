@@ -15,7 +15,7 @@ export default function GalleryBand() {
           decoding="async"
           className="block h-[clamp(280px,42vh,720px)] w-full object-cover md:h-[clamp(340px,68vh,720px)]"
         />
-        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.85)] to-transparent p-6 font-sans text-[clamp(0.95rem,1.6vw,1.25rem)] font-medium">
+        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em]">
           Ninety nine will <span className="text-accent">exist</span>
         </figcaption>
       </figure>
@@ -25,7 +25,7 @@ export default function GalleryBand() {
           poster="assets/middle_poster.jpg"
           className="block h-[clamp(280px,42vh,720px)] w-full object-cover md:h-[clamp(340px,68vh,720px)]"
         />
-        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.85)] to-transparent p-6 font-sans text-[clamp(0.9rem,1.4vw,1.1rem)] font-medium tracking-[0.02em] text-muted">
+        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em] text-muted">
           Every angle, <span className="text-accent">revealed</span>
         </figcaption>
       </figure>

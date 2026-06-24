@@ -4,12 +4,18 @@ import Lenis from 'lenis'
 import Preloader from './components/Preloader'
 import Hero from './components/Hero'
 import ThesisCallout from './components/ThesisCallout'
+import SpecsCounter from './components/SpecsCounter'
+import Marquee from './components/Marquee'
 import FeaturePairs from './components/FeaturePairs'
 import GalleryBand from './components/GalleryBand'
 import CinematicOrbit from './components/CinematicOrbit'
 import DetailRows from './components/DetailRows'
 import CTA from './components/CTA'
 import Footer from './components/Footer'
+import EmberField from './components/EmberField'
+import FilmOverlay from './components/FilmOverlay'
+import Cursor from './components/Cursor'
+import ScrollProgress from './components/ScrollProgress'
 
 export default function App() {
   const [ready, setReady] = useState(false)
@@ -39,9 +45,18 @@ export default function App() {
   return (
     <>
       <AnimatePresence>{!ready && <Preloader key="preloader" />}</AnimatePresence>
-      <main className="bg-bg text-ink">
+
+      {/* Atmosphere + chrome that live above the page, below the loader. */}
+      <Cursor />
+      <ScrollProgress />
+      <EmberField />
+      <FilmOverlay />
+
+      <main className="relative bg-bg text-ink">
         <Hero onReady={() => { setReady(true); }} />
         <ThesisCallout />
+        <SpecsCounter />
+        <Marquee />
         <FeaturePairs />
         <GalleryBand />
         <CinematicOrbit />

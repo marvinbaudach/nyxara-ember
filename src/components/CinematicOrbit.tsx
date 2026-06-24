@@ -137,7 +137,7 @@ const CinematicOrbit = () => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_50%,transparent_45%,oklch(0.12_0.012_50/0.85)_100%)]" />
 
         <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto max-w-[1400px] px-6 pt-16 md:pt-24">
-          <p className="font-sans text-[0.7rem] uppercase tracking-[0.4em] text-muted">Turntable</p>
+          <p className="font-mono text-[0.7rem] uppercase tracking-[0.4em] text-accent">Turntable</p>
           <h2 className="mt-3 font-display text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] text-ink">
             Every angle, <span className="text-accent">in your hands</span>
           </h2>
@@ -147,7 +147,7 @@ const CinematicOrbit = () => {
           </p>
         </div>
 
-        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-[oklch(0.205_0.014_50/0.7)] px-4 py-1.5 font-sans text-[0.7rem] uppercase tracking-[0.25em] text-muted backdrop-blur">
+        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-[oklch(0.205_0.014_50/0.7)] px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-muted backdrop-blur">
           Scroll to orbit
         </div>
       </div>

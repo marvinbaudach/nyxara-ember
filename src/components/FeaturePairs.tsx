@@ -37,7 +37,7 @@ const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBloc
           transition={{ duration: 1.1, ease }}
           className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
         />
-        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.85)] to-transparent p-6 font-sans text-[clamp(0.95rem,1.6vw,1.2rem)] font-medium">
+        <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em]">
           {caption}
         </figcaption>
       </figure>

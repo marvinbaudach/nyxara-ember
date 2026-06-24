@@ -86,33 +86,60 @@ export default function Hero({ onReady }: HeroProps) {
         }}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 26 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, ease }}
-        className="absolute inset-0 z-20 grid place-items-center px-[6vw] text-center"
-      >
+      <div className="absolute inset-0 z-20 grid place-items-center px-[6vw] text-center">
         <div>
-          <p className="mb-6 pl-[0.6em] font-sans text-[clamp(0.8rem,1.4vw,1.05rem)] font-semibold tracking-[0.6em] text-ink">
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease }}
+            className="mb-6 pl-[0.5em] font-mono text-[clamp(0.7rem,1.2vw,0.95rem)] font-medium tracking-[0.62em] text-ink"
+          >
             NYXARA
-          </p>
-          <h1 className="font-display text-[clamp(4rem,21vw,17rem)] font-medium leading-[0.82] tracking-[-0.02em]">
-            EMBER
-          </h1>
-          <p className="mt-7 font-sans text-[0.78rem] uppercase tracking-[0.42em] text-muted">
-            Ninety nine will burn. No more.
-          </p>
-        </div>
-      </motion.div>
+          </motion.p>
 
-      <motion.p
+          {/* The wordmark resolves glyph by glyph from a soft clipped rise — the
+              kind of theatrical entrance award launches use for the model name. */}
+          <h1 className="flex justify-center font-display text-[clamp(4rem,21vw,17rem)] font-medium leading-[0.82] tracking-[-0.02em]">
+            {'EMBER'.split('').map((ch, i) => (
+              <span key={i} className="overflow-hidden">
+                <motion.span
+                  className="inline-block"
+                  initial={{ y: '110%', opacity: 0 }}
+                  animate={{ y: '0%', opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.15 + i * 0.09, ease }}
+                >
+                  {ch}
+                </motion.span>
+              </span>
+            ))}
+          </h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 1 }}
+            className="mt-7 font-mono text-[0.72rem] uppercase tracking-[0.42em] text-muted"
+          >
+            Ninety nine will <span className="text-accent ember-glow">burn</span>. No more.
+          </motion.p>
+        </div>
+      </div>
+
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-[4vh] left-1/2 z-20 -translate-x-1/2 font-sans text-[0.7rem] uppercase tracking-[0.3em] text-muted"
+        transition={{ delay: 1.2, duration: 1 }}
+        className="absolute bottom-[4vh] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3"
       >
-        Scroll
-      </motion.p>
+        <span className="font-mono text-[0.68rem] uppercase tracking-[0.36em] text-muted">Scroll</span>
+        <motion.span
+          aria-hidden
+          className="block h-8 w-px bg-gradient-to-b from-accent to-transparent"
+          animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: 'top' }}
+        />
+      </motion.div>
     </section>
   )
 }

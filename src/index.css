@@ -9,7 +9,8 @@
   --color-hairline: var(--hairline);
 
   --font-display: 'Bodoni Moda', Georgia, serif;
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 :root {
@@ -17,7 +18,7 @@
      amber accent hue (~50). Chroma tapers as L nears 0 or 1. One fire accent. */
   --bg:     oklch(0.155 0.012 50);   /* near black, warm */
   --ink:    oklch(0.940 0.008 70);   /* near white, warm, low chroma */
-  --muted:  oklch(0.620 0.016 50);   /* quiet warm grey */
+  --muted:  oklch(0.685 0.018 50);   /* quiet warm grey — lifted for AA contrast */
   --accent: oklch(0.685 0.190 45);   /* glowing amber resin / fire */
 
   --bg-lift:  oklch(0.205 0.014 50);
@@ -26,15 +27,76 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+
+/* Keyboard focus must stay visible even though the custom cursor hides the
+   native pointer — mouse users get the cursor, keyboard users get the ring. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+/* A precision, instrument-cluster mono for all technical labels, eyebrows and
+   spec readouts. Carries the "engineered object" voice against the Bodoni. */
+.font-mono { font-family: var(--font-mono); }
+
+/* ── Custom cursor ─────────────────────────────────────────────────────────
+   Hide the OS cursor only on fine-pointer (mouse) devices; touch keeps native. */
+@media (pointer: fine) {
+  .has-emcursor, .has-emcursor * { cursor: none !important; }
+}
+
+/* ── Filmic overlays (fixed, non-interactive, sit above everything) ─────────
+   Grain = animated noise; the vignette + faint scanlines add cinema texture. */
+.grain-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: -150%;
+  z-index: 60;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.6s steps(3) infinite;
+  mix-blend-mode: overlay;
+}
+.vignette-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background:
+    radial-gradient(130% 100% at 50% 50%, transparent 58%, oklch(0.10 0.01 50 / 0.55) 100%),
+    repeating-linear-gradient(0deg, transparent 0 2px, oklch(0 0 0 / 0.04) 2px 3px);
+}
+
+@keyframes grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-6%, 3%); }
+  50%  { transform: translate(4%, -5%); }
+  75%  { transform: translate(-3%, 6%); }
+  100% { transform: translate(5%, -2%); }
+}
+
+/* The accent breathes like a live coal — used on hero glyphs and key accents. */
+@keyframes ember-flicker {
+  0%, 100% { opacity: 1; text-shadow: 0 0 18px oklch(0.685 0.19 45 / 0.55), 0 0 60px oklch(0.685 0.19 45 / 0.25); }
+  45%      { opacity: 0.92; text-shadow: 0 0 10px oklch(0.685 0.19 45 / 0.40), 0 0 34px oklch(0.685 0.19 45 / 0.18); }
+  70%      { opacity: 0.98; text-shadow: 0 0 24px oklch(0.72 0.2 48 / 0.6), 0 0 80px oklch(0.685 0.19 45 / 0.3); }
+}
+.ember-glow { animation: ember-flicker 4.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-layer { animation: none; }
+  .ember-glow { animation: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

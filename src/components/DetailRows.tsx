@@ -3,27 +3,38 @@ import { ease } from '../anim'
 
 interface Row { n: string; h: string; t: string }
 
+// Not a spec sheet — those numbers live in SpecsCounter. These three rows are
+// the covenant: what makes each Ember provably one of ninety nine, not just fast.
 const rows: Row[] = [
   {
     n: '01',
-    h: 'Two point one to sixty',
-    t: 'Launch control puts 1340 horsepower down in 2.1 seconds, verified on a sealed runway with two witnesses.',
+    h: 'Witnessed, not claimed',
+    t: 'Every figure on this page was timed on a sealed runway and signed off by two independent observers. No press launch, no estimates.',
   },
   {
     n: '02',
-    h: 'Three hundred ten, then it stops',
-    t: 'Aero shrouds close over the wheels at speed. The Ember holds 310 mph before the limiter speaks.',
+    h: 'Etched, not badged',
+    t: 'Your name and the date of the car’s first night run are laser cut into the sill — the only place the Ember will ever say who it belongs to.',
   },
   {
     n: '03',
-    h: 'Ninety nine cars, ever',
-    t: 'Production ends at ninety nine. Each sill is laser etched with the owner name and the night it first ran.',
+    h: 'Closed, not paused',
+    t: 'At the ninety ninth car the tooling is destroyed in front of the owners. There is no continuation series, no revival, no hundredth.',
   },
 ]
 
 export default function DetailRows() {
   return (
-    <section className="mx-auto max-w-[1100px] px-[8vw] py-[clamp(5rem,12vh,12rem)]">
+    <section className="mx-auto max-w-[1100px] px-[8vw] py-[clamp(5rem,11vh,9rem)]">
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, ease }}
+        className="mb-[clamp(2.5rem,6vh,4.5rem)] font-mono text-[0.7rem] uppercase tracking-[0.5em] text-accent"
+      >
+        The covenant
+      </motion.p>
       {rows.map((r, i) => (
         <motion.div
           key={r.n}
