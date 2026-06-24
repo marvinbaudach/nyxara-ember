@@ -22,7 +22,7 @@ const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBloc
     <motion.div
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, margin: '-18%' }}
+      viewport={{ once: true, amount: 0.25 }}
       className={`relative mx-auto grid max-w-[1200px] items-center gap-[clamp(2rem,5vw,5rem)] border-t border-hairline pt-[clamp(4rem,9vh,9rem)] md:grid-cols-2 ${
         reverse ? 'md:[&>figure]:order-2' : ''
       }`}

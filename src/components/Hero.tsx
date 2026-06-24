@@ -74,7 +74,7 @@ export default function Hero({ onReady }: HeroProps) {
         preload="auto"
         aria-hidden
       />
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" poster="assets/g3.jpg" />
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} muted playsInline preload="auto" />
       <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="auto" />
 
       {/* soft dark contrast halo so the wordmark never washes out */}

@@ -23,7 +23,7 @@ const reducedMotion = () =>
 // One animated numeral. Counts up from zero the first time it scrolls in.
 const Counter = ({ spec, delay }: { spec: Spec; delay: number }) => {
   const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-20%' })
+  const inView = useInView(ref, { once: true, amount: 0.4 })
   const [text, setText] = useState(() =>
     reducedMotion() ? spec.value.toFixed(spec.decimals) : (0).toFixed(spec.decimals),
   )
@@ -60,7 +60,7 @@ export default function SpecsCounter() {
             key={s.label}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-12%' }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8, delay: i * 0.08, ease }}
             className="group relative border-t border-hairline pt-7 text-center md:text-left"
           >

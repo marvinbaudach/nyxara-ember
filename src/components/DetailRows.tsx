@@ -40,7 +40,7 @@ export default function DetailRows() {
           key={r.n}
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-12%' }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7, delay: i * 0.05, ease }}
           className="grid grid-cols-[auto_1fr] items-baseline gap-[clamp(1.5rem,5vw,5rem)] border-t border-hairline py-[clamp(2rem,5vh,4rem)] md:grid-cols-[auto_0.9fr_1.1fr]"
         >
