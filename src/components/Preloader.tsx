@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
+import { usePrefersReducedMotion } from '../hooks'
 
 // Full-screen branded loading veil. Stays until the hero video is actually
 // playing, so the visitor never sees the poster pop to video. A climbing readout
 // (and an ember that ignites the wordmark) turns the wait into a countdown to
 // the reveal rather than a dead spinner.
 export default function Preloader() {
-  const [pct, setPct] = useState(() =>
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 99
-      : 0,
-  )
+  const reduced = usePrefersReducedMotion()
+  const [pct, setPct] = useState(() => (reduced ? 99 : 0))
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (reduced) return
     let raf = 0
     const start = performance.now()
     const tick = (t: number) => {
@@ -26,7 +23,7 @@ export default function Preloader() {
     }
     raf = requestAnimationFrame(tick)
     return () => { cancelAnimationFrame(raf) }
-  }, [])
+  }, [reduced])
 
   return (
     <motion.div

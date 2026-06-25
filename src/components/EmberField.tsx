@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { usePrefersReducedMotion } from '../hooks'
 
 // Live ember field. A fixed full-viewport canvas of drifting sparks rising like
 // heat off the page — the one thing that makes a site named "Ember" feel alive.
@@ -14,20 +15,45 @@ interface Spark {
   r: number
   life: number
   max: number
-  hue: number
+  sprite: number // index into the pre-baked glow sprites, by hue bucket
 }
 
 const COUNT = 52
+const HUE_MIN = 32 // amber
+const HUE_MAX = 54 // orange
+const SPRITES = 8 // pre-baked glow textures across the hue range
+const SPRITE_R = 32 // radius each sprite is baked at; scaled down per draw
+
+// Bake the radial-gradient glow once per hue bucket into offscreen canvases.
+// Drawing these with `drawImage` + globalAlpha replaces a `createRadialGradient`
+// allocation for every spark every frame (~3000/s) — the dominant cost in the
+// loop — with a cheap, GC-free blit.
+const bakeSprites = () =>
+  Array.from({ length: SPRITES }, (_, i) => {
+    const hue = HUE_MIN + (HUE_MAX - HUE_MIN) * (i / (SPRITES - 1))
+    const c = document.createElement('canvas')
+    c.width = c.height = SPRITE_R * 2
+    const g = c.getContext('2d')
+    if (!g) return c
+    const grad = g.createRadialGradient(SPRITE_R, SPRITE_R, 0, SPRITE_R, SPRITE_R, SPRITE_R)
+    grad.addColorStop(0, `oklch(0.8 0.2 ${hue} / 1)`)
+    grad.addColorStop(1, `oklch(0.6 0.2 ${hue} / 0)`)
+    g.fillStyle = grad
+    g.fillRect(0, 0, SPRITE_R * 2, SPRITE_R * 2)
+    return c
+  })
 
 export default function EmberField() {
   const ref = useRef<HTMLCanvasElement>(null)
+  const reducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
     const canvas = ref.current
-    if (!canvas) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!canvas || reducedMotion) return
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
+
+    const sprites = bakeSprites()
 
     let w = 0
     let h = 0
@@ -53,7 +79,7 @@ export default function EmberField() {
       r: 0.6 + Math.random() * 1.9,
       life: 0,
       max: 240 + Math.random() * 360,
-      hue: 32 + Math.random() * 22, // amber → orange
+      sprite: Math.floor(Math.random() * SPRITES), // amber → orange bucket
     })
 
     const sparks: Spark[] = Array.from({ length: COUNT }, () => spawn(true))
@@ -89,16 +115,16 @@ export default function EmberField() {
         const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
         const alpha = Math.max(0, fade) * 0.9
 
-        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4)
-        g.addColorStop(0, `oklch(0.8 0.2 ${s.hue} / ${alpha})`)
-        g.addColorStop(1, `oklch(0.6 0.2 ${s.hue} / 0)`)
-        ctx.fillStyle = g
-        ctx.beginPath()
-        ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2)
-        ctx.fill()
+        // Blit the pre-baked glow, scaled to this spark's size and faded via
+        // globalAlpha — no per-frame gradient allocation.
+        const d = s.r * 8 // sprite drawn at diameter r*8 (radius r*4)
+        ctx.globalAlpha = alpha
+        ctx.drawImage(sprites[s.sprite], s.x - s.r * 4, s.y - s.r * 4, d, d)
 
         if (s.life >= s.max || s.y < -20) Object.assign(s, spawn())
       }
+
+      ctx.globalAlpha = 1
 
       if (running) raf = requestAnimationFrame(step)
     }
@@ -136,7 +162,7 @@ export default function EmberField() {
       window.removeEventListener('pointerleave', onLeave)
       document.removeEventListener('visibilitychange', onVis)
     }
-  }, [])
+  }, [reducedMotion])
 
   return (
     <canvas

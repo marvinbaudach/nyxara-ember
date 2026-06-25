@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { useMediaQuery, usePrefersReducedMotion } from '../hooks'
 
 // Custom cursor: a sharp dot at the true pointer plus a soft ember ring that
 // trails behind on a spring. The ring swells and ignites over anything
 // interactive. Mouse only — touch devices never see it and keep native input.
 export default function Cursor() {
-  const [enabled] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(pointer: fine)').matches &&
-      !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
+  const finePointer = useMediaQuery('(pointer: fine)')
+  const reduced = usePrefersReducedMotion()
+  const enabled = finePointer && !reduced
   const [active, setActive] = useState(false)
   const [down, setDown] = useState(false)
 

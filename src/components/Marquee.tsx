@@ -8,6 +8,7 @@ import {
   useAnimationFrame,
   useMotionValue,
 } from 'framer-motion'
+import { usePrefersReducedMotion } from '../hooks'
 
 // Kinetic marquee. The strip auto-scrolls forever; scroll velocity bends it —
 // it speeds up, reverses with the scroll direction, and skews as you fling the
@@ -16,12 +17,8 @@ import {
 // repeats its own figures.
 const PHRASE = ['Ninety nine will burn', 'No more', 'Built in the dark', 'Driven once, at night']
 
-const reducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function Marquee() {
-  const reduced = reducedMotion()
+  const reduced = usePrefersReducedMotion()
   const baseX = useMotionValue(0)
   const { scrollY } = useScroll()
   const scrollVelocity = useVelocity(scrollY)

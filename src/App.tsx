@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Lenis from 'lenis'
+import { usePrefersReducedMotion } from './hooks'
 import Preloader from './components/Preloader'
 import Hero from './components/Hero'
 import ThesisCallout from './components/ThesisCallout'
@@ -19,6 +20,7 @@ import ScrollProgress from './components/ScrollProgress'
 
 export default function App() {
   const [ready, setReady] = useState(false)
+  const reducedMotion = usePrefersReducedMotion()
 
   // Lock scrolling while the loading veil is up.
   useEffect(() => {
@@ -33,14 +35,13 @@ export default function App() {
 
   // Smooth inertia scroll, started once the experience is revealed.
   useEffect(() => {
-    if (!ready) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!ready || reducedMotion) return
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
     let raf = 0
     const loop = (t: number) => { lenis.raf(t); raf = requestAnimationFrame(loop) }
     raf = requestAnimationFrame(loop)
     return () => { cancelAnimationFrame(raf); lenis.destroy() }
-  }, [ready])
+  }, [ready, reducedMotion])
 
   return (
     <>

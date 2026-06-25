@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useCoarsePointer, usePrefersReducedMotion } from '../hooks'
 
 // Scroll-scrubbed cinematic orbit. Instead of a live WebGL turntable we play a
 // pre-rendered fly-around video, with the scroll position driving the video's
@@ -8,21 +9,12 @@ import { useEffect, useRef, useState } from 'react'
 const SRC = 'assets/orbit.mp4'
 const POSTER = 'assets/g3.jpg'
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-// Touch-primary device with no mouse/trackpad — i.e. a real phone/tablet whose
-// video decoder seeks slowly. Drives the coarse-grained, seek-gated scrub path.
-const isCoarsePointer = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(pointer: coarse)').matches &&
-  !window.matchMedia('(any-pointer: fine)').matches
-
 const CinematicOrbit = () => {
   const trackRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [active, setActive] = useState(false)
+  const reducedMotion = usePrefersReducedMotion()
+  const coarse = useCoarsePointer()
 
   // Pause the scrub loop unless the section is on (or near) screen.
   useEffect(() => {
@@ -39,21 +31,20 @@ const CinematicOrbit = () => {
   // Reduced-motion: don't hijack scroll — just loop the clip gently.
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !prefersReducedMotion()) return
+    if (!video || !reducedMotion) return
     video.loop = true
     video.play().catch(() => { /* autoplay may be blocked; poster stays */ })
-  }, [])
+  }, [reducedMotion])
 
   // The scrub loop: map how far the tall track has scrolled through the
   // viewport onto the video timeline, easing currentTime toward the target so
   // fast flicks don't make the seek stutter.
   useEffect(() => {
-    if (!active || prefersReducedMotion()) return
+    if (!active || reducedMotion) return
     const video = videoRef.current
     const track = trackRef.current
     if (!video || !track) return
 
-    const coarse = isCoarsePointer()
     let raf = 0
     // Force the first frame to paint as soon as data is ready so the poster
     // gives way to actual footage — otherwise, while progress sits at ~0 the
@@ -106,7 +97,7 @@ const CinematicOrbit = () => {
       cancelAnimationFrame(raf)
       if (coarse) video.removeEventListener('seeked', onSeeked)
     }
-  }, [active])
+  }, [active, reducedMotion, coarse])
 
   return (
     <section

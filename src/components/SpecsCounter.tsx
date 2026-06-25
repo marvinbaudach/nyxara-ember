@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion, useInView, animate } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
 import { ease } from '../anim'
+import { usePrefersReducedMotion } from '../hooks'
 
 interface Spec {
   value: number
@@ -16,30 +17,23 @@ const specs: Spec[] = [
   { value: 99, decimals: 0, suffix: '', label: 'Built, then never again' },
 ]
 
-const reducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 // One animated numeral. Counts up from zero the first time it scrolls in.
+// The tween drives a MotionValue rendered straight into the DOM, so the ~60fps
+// updates never trip a React re-render — only this one text node changes.
 const Counter = ({ spec, delay }: { spec: Spec; delay: number }) => {
   const ref = useRef<HTMLSpanElement>(null)
+  const reduced = usePrefersReducedMotion()
   const inView = useInView(ref, { once: true, amount: 0.4 })
-  const [text, setText] = useState(() =>
-    reducedMotion() ? spec.value.toFixed(spec.decimals) : (0).toFixed(spec.decimals),
-  )
+  const count = useMotionValue(reduced ? spec.value : 0)
+  const text = useTransform(count, (v) => v.toFixed(spec.decimals))
 
   useEffect(() => {
-    if (!inView || reducedMotion()) return
-    const controls = animate(0, spec.value, {
-      duration: 1.8,
-      delay,
-      ease,
-      onUpdate: (v) => { setText(v.toFixed(spec.decimals)) },
-    })
+    if (!inView || reduced) return
+    const controls = animate(count, spec.value, { duration: 1.8, delay, ease })
     return () => { controls.stop() }
-  }, [inView, spec.value, spec.decimals, delay])
+  }, [inView, reduced, count, spec.value, delay])
 
-  return <span ref={ref} className="tabular-nums">{text}</span>
+  return <motion.span ref={ref} className="tabular-nums">{text}</motion.span>
 }
 
 export default function SpecsCounter() {
