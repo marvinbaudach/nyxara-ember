@@ -80,10 +80,10 @@ export default function Hero({ onReady }: HeroProps) {
       />
       {/* Layer A reveals first — gets full preload priority and a poster so the
           frame is visible the instant the loader lifts, before decode catches up. */}
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} poster={POSTER} muted playsInline preload="auto" />
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} poster={POSTER} muted playsInline preload="auto" aria-hidden />
       {/* Layer B only matters near the first loop boundary (~7s in), by which time
           A has buffered the same file. preload="none" keeps it off the critical path. */}
-      <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="none" />
+      <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="none" aria-hidden />
 
       {/* soft dark contrast halo so the wordmark never washes out */}
       <div
@@ -107,9 +107,12 @@ export default function Hero({ onReady }: HeroProps) {
 
           {/* The wordmark resolves glyph by glyph from a soft clipped rise — the
               kind of theatrical entrance award launches use for the model name. */}
-          <h1 className="flex justify-center font-display text-[clamp(4rem,21vw,17rem)] font-medium leading-[0.82] tracking-[-0.02em]">
+          <h1
+            aria-label="Ember"
+            className="flex justify-center font-display text-[clamp(4rem,21vw,17rem)] font-medium leading-[0.82] tracking-[-0.02em]"
+          >
             {'EMBER'.split('').map((ch, i) => (
-              <span key={i} className="overflow-hidden">
+              <span key={i} aria-hidden className="overflow-hidden">
                 <motion.span
                   className="inline-block"
                   initial={{ y: '110%', opacity: 0 }}

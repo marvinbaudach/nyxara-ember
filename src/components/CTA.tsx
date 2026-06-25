@@ -19,6 +19,7 @@ const SheenButton = ({ children }: { children: ReactNode }) => {
   return (
     <button
       ref={ref}
+      type="button"
       onMouseMove={onMove}
       onMouseEnter={() => { setLit(true); }}
       onMouseLeave={() => { setLit(false); }}

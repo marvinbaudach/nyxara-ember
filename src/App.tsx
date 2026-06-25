@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, MotionConfig } from 'framer-motion'
 import Lenis from 'lenis'
 import { usePrefersReducedMotion } from './hooks'
 import Preloader from './components/Preloader'
@@ -44,7 +44,19 @@ export default function App() {
   }, [ready, reducedMotion])
 
   return (
-    <>
+    // reducedMotion="user" makes every Framer animation honour the OS
+    // "reduce motion" setting — transform/layout tweens resolve instantly while
+    // essential opacity fades stay, so the page never moves for visitors who
+    // asked it not to.
+    <MotionConfig reducedMotion="user">
+      {/* First tab stop: jump straight past the decorative chrome to content. */}
+      <a
+        href="#main"
+        className="sr-only z-[80] rounded-full bg-bg-lift px-5 py-3 font-mono text-sm text-ink outline outline-2 outline-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to content
+      </a>
+
       <AnimatePresence>{!ready && <Preloader key="preloader" />}</AnimatePresence>
 
       {/* Atmosphere + chrome that live above the page, below the loader. */}
@@ -53,7 +65,7 @@ export default function App() {
       <EmberField />
       <FilmOverlay />
 
-      <main className="relative bg-bg text-ink">
+      <main id="main" className="relative bg-bg text-ink">
         <Hero onReady={() => { setReady(true); }} />
         <ThesisCallout />
         <SpecsCounter />
@@ -65,6 +77,6 @@ export default function App() {
         <CTA />
         <Footer />
       </main>
-    </>
+    </MotionConfig>
   )
 }

@@ -30,9 +30,14 @@ export default function Preloader() {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease }}
+      role="status"
+      aria-label="Loading the Ember experience"
       className="fixed inset-0 z-50 grid place-items-center bg-bg"
     >
-      <div className="text-center">
+      {/* The wordmark and live percentage are decorative chrome around the one
+          announced label above — hide them so the readout isn't re-announced
+          on every tick. */}
+      <div className="text-center" aria-hidden>
         <p className="pl-[0.5em] font-display text-[clamp(2rem,6vw,3.5rem)] tracking-[0.5em] text-ink">
           NYX<span className="text-accent ember-glow">A</span>RA
         </p>

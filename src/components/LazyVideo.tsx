@@ -64,6 +64,7 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
       loop
       playsInline
       preload="none"
+      aria-hidden
       className={className}
     />
   )

@@ -121,6 +121,7 @@ const CinematicOrbit = () => {
           muted
           playsInline
           preload="auto"
+          aria-hidden
           // No controls / no autoplay: scroll drives the frame.
         />
 
