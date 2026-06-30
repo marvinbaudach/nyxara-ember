@@ -94,9 +94,17 @@ body {
 }
 .ember-glow { animation: ember-flicker 4.5s ease-in-out infinite; }
 
+/* Footer "build status" coal — a small live ember that breathes and casts a halo. */
+@keyframes dot-coal {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.685 0.19 45 / 0.55), 0 0 10px 2px oklch(0.685 0.19 45 / 0.45); opacity: 1; }
+  50%      { box-shadow: 0 0 0 6px oklch(0.685 0.19 45 / 0); opacity: 0.78; }
+}
+.dot-coal { animation: dot-coal 2.6s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .grain-layer { animation: none; }
   .ember-glow { animation: none; }
+  .dot-coal { animation: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
