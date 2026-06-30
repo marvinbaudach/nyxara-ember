@@ -1,31 +1,23 @@
 # NYXARA Ember
 
-An immersive concept landing page for a fictional futuristic hypercar, built as a cinematic single page experience.
+Cinematic concept landing page for a fictional futuristic hypercar.
 
-**Live:** https://marvinbaudach.github.io/nyxara-ember/
+**Live → [marvinbaudach.github.io/nyxara-ember](https://marvinbaudach.github.io/nyxara-ember/)**
 
-## Stack
+## Tech
 
-- React 18 + Vite + TypeScript
-- Tailwind CSS
-- Framer Motion (reveal and motion)
-- Lenis (smooth inertia scroll)
-
-All image and video assets are AI generated and kept consistent to one car design.
+- React 19 · Vite 8 · TypeScript 6
+- Tailwind CSS 4
+- Custom WebGL ember field + cinematic orbit shader
+- Scroll-driven CSS (`animation-timeline`) · Framer Motion · Lenis smooth scroll
+- All assets AI-generated, kept consistent to one car design
 
 ## Develop
 
 ```bash
 npm install
 npm run dev
-```
-
-## Build
-
-```bash
 npm run build
 ```
 
-## Deploy
-
-Pushing to `main` builds the site and publishes it to GitHub Pages via the workflow in `.github/workflows/deploy.yml`.
+Deploys to GitHub Pages on push to `main`.
