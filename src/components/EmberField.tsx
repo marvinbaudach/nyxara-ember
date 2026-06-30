@@ -4,8 +4,12 @@ import { usePrefersReducedMotion } from '../hooks'
 // Live ember field. A fixed full-viewport canvas of drifting sparks rising like
 // heat off the page — the one thing that makes a site named "Ember" feel alive.
 // Sparks waft upward with a little turbulence, flare and fade, and lean away
-// from the cursor as if pushed by the air it moves. Kept cheap: a capped count,
-// DPR clamped to 2, paused when the tab is hidden, and skipped entirely under
+// from the cursor as if pushed by the air it moves.
+//
+// Rendering is GPU-first: a WebGL2 pass draws each spark as an additively
+// blended point sprite, so the glows pile into real bloom and we can afford far
+// more particles. Browsers without WebGL2 fall back to the cheaper 2D-canvas
+// blit. Either way it's paused when the tab is hidden and skipped entirely under
 // reduced-motion.
 interface Spark {
   x: number
@@ -15,19 +19,121 @@ interface Spark {
   r: number
   life: number
   max: number
-  sprite: number // index into the pre-baked glow sprites, by hue bucket
+  hue: number // amber → orange
 }
 
-const COUNT = 52
-const HUE_MIN = 32 // amber
-const HUE_MAX = 54 // orange
-const SPRITES = 8 // pre-baked glow textures across the hue range
-const SPRITE_R = 32 // radius each sprite is baked at; scaled down per draw
+const HUE_MIN = 32
+const HUE_MAX = 54
+const GL_COUNT = 150 // GPU can carry many more than the 2D fallback
+const FALLBACK_COUNT = 52
+const SPRITES = 8
+const SPRITE_R = 32
 
-// Bake the radial-gradient glow once per hue bucket into offscreen canvases.
-// Drawing these with `drawImage` + globalAlpha replaces a `createRadialGradient`
-// allocation for every spark every frame (~3000/s) — the dominant cost in the
-// loop — with a cheap, GC-free blit.
+// amber → warmer orange across the hue range, in linear-ish sRGB (0..1).
+const colorForHue = (hue: number): [number, number, number] => {
+  const t = (hue - HUE_MIN) / (HUE_MAX - HUE_MIN)
+  return [1, 0.5 + 0.22 * t, 0.12 + 0.12 * t]
+}
+
+// ── WebGL2 renderer ─────────────────────────────────────────────────────────
+const VERT = `#version 300 es
+in vec2 a_pos;      // device-pixel position
+in float a_size;    // point size in device px
+in float a_alpha;
+in vec3 a_color;
+uniform vec2 u_res; // canvas size in device px
+out float v_alpha;
+out vec3 v_color;
+void main() {
+  vec2 clip = (a_pos / u_res) * 2.0 - 1.0;
+  gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+  gl_PointSize = a_size;
+  v_alpha = a_alpha;
+  v_color = a_color;
+}`
+
+const FRAG = `#version 300 es
+precision mediump float;
+in float v_alpha;
+in vec3 v_color;
+out vec4 frag;
+void main() {
+  // Soft radial falloff that mimics the old radial-gradient sprite.
+  float d = length(gl_PointCoord - 0.5);
+  float a = smoothstep(0.5, 0.0, d);
+  a *= a;
+  // Premultiplied output for additive (ONE, ONE) blending → glows accumulate.
+  frag = vec4(v_color * a * v_alpha, a * v_alpha);
+}`
+
+const FLOATS = 7 // x, y, size, alpha, r, g, b
+
+const makeGLRenderer = (gl: WebGL2RenderingContext, count: number) => {
+  const compile = (type: number, src: string) => {
+    const sh = gl.createShader(type)
+    if (!sh) return null
+    gl.shaderSource(sh, src)
+    gl.compileShader(sh)
+    return sh
+  }
+  const prog = gl.createProgram()
+  const vs = compile(gl.VERTEX_SHADER, VERT)
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG)
+  if (!vs || !fs) return null
+  gl.attachShader(prog, vs)
+  gl.attachShader(prog, fs)
+  gl.linkProgram(prog)
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null
+  gl.useProgram(prog)
+
+  const buf = gl.createBuffer()
+  const data = new Float32Array(count * FLOATS)
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+  gl.bufferData(gl.ARRAY_BUFFER, data.byteLength, gl.DYNAMIC_DRAW)
+
+  const stride = FLOATS * 4
+  const attr = (name: string, size: number, offset: number) => {
+    const loc = gl.getAttribLocation(prog, name)
+    gl.enableVertexAttribArray(loc)
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, stride, offset)
+  }
+  attr('a_pos', 2, 0)
+  attr('a_size', 1, 8)
+  attr('a_alpha', 1, 12)
+  attr('a_color', 3, 16)
+  const uRes = gl.getUniformLocation(prog, 'u_res')
+
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.ONE, gl.ONE)
+  gl.clearColor(0, 0, 0, 0)
+
+  return {
+    resize() { gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight) },
+    draw(sparks: Spark[], dpr: number) {
+      for (let i = 0; i < sparks.length; i++) {
+        const s = sparks[i]
+        const t = s.life / s.max
+        const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
+        const [r, g, b] = colorForHue(s.hue)
+        const o = i * FLOATS
+        data[o] = s.x * dpr
+        data[o + 1] = s.y * dpr
+        data[o + 2] = s.r * 8 * dpr
+        data[o + 3] = Math.max(0, fade) * 0.9
+        data[o + 4] = r
+        data[o + 5] = g
+        data[o + 6] = b
+      }
+      gl.uniform2f(uRes, gl.drawingBufferWidth, gl.drawingBufferHeight)
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, data)
+      gl.clear(gl.COLOR_BUFFER_BIT)
+      gl.drawArrays(gl.POINTS, 0, sparks.length)
+    },
+    destroy() { gl.deleteBuffer(buf); gl.deleteProgram(prog) },
+  }
+}
+
+// ── 2D-canvas fallback ──────────────────────────────────────────────────────
 const bakeSprites = () =>
   Array.from({ length: SPRITES }, (_, i) => {
     const hue = HUE_MIN + (HUE_MAX - HUE_MIN) * (i / (SPRITES - 1))
@@ -43,6 +149,36 @@ const bakeSprites = () =>
     return c
   })
 
+const make2DRenderer = (ctx: CanvasRenderingContext2D, dpr: number) => {
+  const sprites = bakeSprites()
+  let w = 0
+  let h = 0
+  return {
+    resize(cssW: number, cssH: number) {
+      w = cssW
+      h = cssH
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    },
+    draw(sparks: Spark[]) {
+      ctx.clearRect(0, 0, w, h)
+      ctx.globalCompositeOperation = 'lighter'
+      for (const s of sparks) {
+        const t = s.life / s.max
+        const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
+        const bucket = Math.min(
+          SPRITES - 1,
+          Math.floor(((s.hue - HUE_MIN) / (HUE_MAX - HUE_MIN)) * SPRITES),
+        )
+        const d = s.r * 8
+        ctx.globalAlpha = Math.max(0, fade) * 0.9
+        ctx.drawImage(sprites[bucket], s.x - s.r * 4, s.y - s.r * 4, d, d)
+      }
+      ctx.globalAlpha = 1
+    },
+    destroy() { /* nothing to release */ },
+  }
+}
+
 export default function EmberField() {
   const ref = useRef<HTMLCanvasElement>(null)
   const reducedMotion = usePrefersReducedMotion()
@@ -50,15 +186,20 @@ export default function EmberField() {
   useEffect(() => {
     const canvas = ref.current
     if (!canvas || reducedMotion) return
-    const ctx = canvas.getContext('2d', { alpha: true })
-    if (!ctx) return
 
-    const sprites = bakeSprites()
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false })
 
     let w = 0
     let h = 0
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
     const pointer = { x: -9999, y: -9999 }
+
+    // Pick the GPU path when available, otherwise the 2D blit.
+    const glRenderer = gl ? makeGLRenderer(gl, GL_COUNT) : null
+    const ctx2d = glRenderer ? null : canvas.getContext('2d', { alpha: true })
+    const renderer2d = ctx2d ? make2DRenderer(ctx2d, dpr) : null
+    if (!glRenderer && !renderer2d) return
+    const count = glRenderer ? GL_COUNT : FALLBACK_COUNT
 
     const resize = () => {
       w = window.innerWidth
@@ -67,7 +208,8 @@ export default function EmberField() {
       canvas.height = h * dpr
       canvas.style.width = `${w}px`
       canvas.style.height = `${h}px`
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      glRenderer?.resize()
+      renderer2d?.resize(w, h)
     }
     resize()
 
@@ -79,18 +221,15 @@ export default function EmberField() {
       r: 0.6 + Math.random() * 1.9,
       life: 0,
       max: 240 + Math.random() * 360,
-      sprite: Math.floor(Math.random() * SPRITES), // amber → orange bucket
+      hue: HUE_MIN + Math.random() * (HUE_MAX - HUE_MIN),
     })
 
-    const sparks: Spark[] = Array.from({ length: COUNT }, () => spawn(true))
+    const sparks: Spark[] = Array.from({ length: count }, () => spawn(true))
 
     let raf = 0
     let running = true
 
     const step = () => {
-      ctx.clearRect(0, 0, w, h)
-      ctx.globalCompositeOperation = 'lighter'
-
       for (const s of sparks) {
         // Gentle turbulence + buoyancy.
         s.vx += (Math.random() - 0.5) * 0.02
@@ -111,20 +250,11 @@ export default function EmberField() {
         s.y += s.vy
         s.life++
 
-        const t = s.life / s.max
-        const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
-        const alpha = Math.max(0, fade) * 0.9
-
-        // Blit the pre-baked glow, scaled to this spark's size and faded via
-        // globalAlpha — no per-frame gradient allocation.
-        const d = s.r * 8 // sprite drawn at diameter r*8 (radius r*4)
-        ctx.globalAlpha = alpha
-        ctx.drawImage(sprites[s.sprite], s.x - s.r * 4, s.y - s.r * 4, d, d)
-
         if (s.life >= s.max || s.y < -20) Object.assign(s, spawn())
       }
 
-      ctx.globalAlpha = 1
+      if (glRenderer) glRenderer.draw(sparks, dpr)
+      else renderer2d?.draw(sparks)
 
       if (running) raf = requestAnimationFrame(step)
     }
@@ -161,6 +291,8 @@ export default function EmberField() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerleave', onLeave)
       document.removeEventListener('visibilitychange', onVis)
+      glRenderer?.destroy()
+      renderer2d?.destroy()
     }
   }, [reducedMotion])
 

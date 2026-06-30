@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "verify": "npm run typecheck && npm run lint",
+    "assets": "bash scripts/encode-assets.sh",
     "preview": "vite preview",
     "prepare": "husky"
   },

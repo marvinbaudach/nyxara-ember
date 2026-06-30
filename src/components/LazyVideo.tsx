@@ -55,10 +55,12 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
     return () => { preBuffer.disconnect(); playback.disconnect(); }
   }, [])
 
+  // `src` is the universal MP4; the matching VP9/WebM is served first.
+  const webm = src.replace(/\.mp4$/, '.webm')
+
   return (
     <video
       ref={ref}
-      src={src}
       poster={poster}
       muted
       loop
@@ -66,6 +68,9 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
       preload="none"
       aria-hidden
       className={className}
-    />
+    >
+      <source src={webm} type="video/webm" />
+      <source src={src} type="video/mp4" />
+    </video>
   )
 }

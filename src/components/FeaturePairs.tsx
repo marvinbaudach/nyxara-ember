@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
+import { lqip } from '../lqip.generated'
 
 interface FeatureBlockProps {
   img: string
@@ -17,6 +18,8 @@ interface FeatureBlockProps {
 const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBlockProps) => {
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
+  const avif = img.replace(/\.jpg$/, '.avif')
+  const key = img.replace(/^.*\/|\.jpg$/g, '') // e.g. assets/g1.jpg → g1
 
   return (
     <motion.div
@@ -27,16 +30,24 @@ const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBloc
         reverse ? 'md:[&>figure]:order-2' : ''
       }`}
     >
-      <figure className="relative overflow-hidden">
-        <motion.img
-          src={img}
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          variants={{ hidden: { clipPath: from, scale: 1.06 }, show: { clipPath: to, scale: 1 } }}
-          transition={{ duration: 1.1, ease }}
-          className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
-        />
+      <figure
+        className="relative overflow-hidden bg-cover bg-center"
+        // Tiny inline AVIF preview, blurred up behind the real image so there's
+        // no empty box while it streams in (the image paints over it).
+        style={{ backgroundImage: lqip[key] ? `url(${lqip[key]})` : undefined }}
+      >
+        <picture>
+          <source srcSet={avif} type="image/avif" />
+          <motion.img
+            src={img}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            variants={{ hidden: { clipPath: from, scale: 1.06 }, show: { clipPath: to, scale: 1 } }}
+            transition={{ duration: 1.1, ease }}
+            className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
+          />
+        </picture>
         <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em]">
           {caption}
         </figcaption>

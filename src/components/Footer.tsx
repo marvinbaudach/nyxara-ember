@@ -1,6 +1,3 @@
-import { motion } from 'framer-motion'
-import { ease } from '../anim'
-
 const links = [
   { label: 'Reserve', href: '#reserve' },
   { label: 'The build', href: '#' },
@@ -11,13 +8,7 @@ const links = [
 export default function Footer() {
   return (
     <footer className="border-t border-hairline px-[8vw] pb-12 pt-[clamp(4rem,9vh,7rem)]">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease }}
-        className="mx-auto max-w-[1100px]"
-      >
+      <div className="reveal-up mx-auto max-w-[1100px]">
         <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="font-display text-[clamp(2rem,5vw,3.5rem)] leading-none tracking-[0.04em]">
@@ -47,7 +38,7 @@ export default function Footer() {
           <span>&copy; 2026 Nyxara Motorwerke — a fictional concept</span>
           <span>Ember &middot; 01 / 99</span>
         </div>
-      </motion.div>
+      </div>
     </footer>
   )
 }

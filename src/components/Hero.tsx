@@ -2,9 +2,19 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
 
-const SRC = 'assets/hero.mp4'
+const SRC_WEBM = 'assets/hero.webm' // VP9 — ~⅓ the size, served first where supported
+const SRC_MP4 = 'assets/hero.mp4' // H.264 — universal fallback
 const POSTER = 'assets/hero_poster.jpg' // first frame — shown until decode catches up
 const FADE = 0.8 // seconds of crossfade at the loop boundary
+
+// Modern source first, then the universal fallback. The browser keeps the first
+// type it can decode.
+const Sources = () => (
+  <>
+    <source src={SRC_WEBM} type="video/webm" />
+    <source src={SRC_MP4} type="video/mp4" />
+  </>
+)
 
 interface HeroProps { onReady?: () => void }
 
@@ -69,7 +79,6 @@ export default function Hero({ onReady }: HeroProps) {
           never competes with layer A for the first playable frame. */}
       <video
         className="absolute inset-0 z-0 hidden h-full w-full scale-110 object-cover brightness-[0.55] blur-2xl portrait:block"
-        src={SRC}
         poster={POSTER}
         muted
         loop
@@ -77,13 +86,19 @@ export default function Hero({ onReady }: HeroProps) {
         playsInline
         preload="metadata"
         aria-hidden
-      />
+      >
+        <Sources />
+      </video>
       {/* Layer A reveals first — gets full preload priority and a poster so the
           frame is visible the instant the loader lifts, before decode catches up. */}
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} src={SRC} poster={POSTER} muted playsInline preload="auto" aria-hidden />
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} poster={POSTER} muted playsInline preload="auto" aria-hidden>
+        <Sources />
+      </video>
       {/* Layer B only matters near the first loop boundary (~7s in), by which time
           A has buffered the same file. preload="none" keeps it off the critical path. */}
-      <video ref={bRef} className={layer} style={{ opacity: 0 }} src={SRC} muted playsInline preload="none" aria-hidden />
+      <video ref={bRef} className={layer} style={{ opacity: 0 }} muted playsInline preload="none" aria-hidden>
+        <Sources />
+      </video>
 
       {/* soft dark contrast halo so the wordmark never washes out */}
       <div
