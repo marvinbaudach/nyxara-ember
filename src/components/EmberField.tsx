@@ -29,12 +29,6 @@ const FALLBACK_COUNT = 52
 const SPRITES = 8
 const SPRITE_R = 32
 
-// amber → warmer orange across the hue range, in linear-ish sRGB (0..1).
-const colorForHue = (hue: number): [number, number, number] => {
-  const t = (hue - HUE_MIN) / (HUE_MAX - HUE_MIN)
-  return [1, 0.5 + 0.22 * t, 0.12 + 0.12 * t]
-}
-
 // ── WebGL2 renderer ─────────────────────────────────────────────────────────
 const VERT = `#version 300 es
 in vec2 a_pos;      // device-pixel position
@@ -114,15 +108,17 @@ const makeGLRenderer = (gl: WebGL2RenderingContext, count: number) => {
         const s = sparks[i]
         const t = s.life / s.max
         const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
-        const [r, g, b] = colorForHue(s.hue)
+        // amber → warmer orange across the hue range, inlined to avoid a
+        // per-spark, per-frame array allocation in this hot loop.
+        const ct = (s.hue - HUE_MIN) / (HUE_MAX - HUE_MIN)
         const o = i * FLOATS
         data[o] = s.x * dpr
         data[o + 1] = s.y * dpr
         data[o + 2] = s.r * 8 * dpr
         data[o + 3] = Math.max(0, fade) * 0.9
-        data[o + 4] = r
-        data[o + 5] = g
-        data[o + 6] = b
+        data[o + 4] = 1
+        data[o + 5] = 0.5 + 0.22 * ct
+        data[o + 6] = 0.12 + 0.12 * ct
       }
       gl.uniform2f(uRes, gl.drawingBufferWidth, gl.drawingBufferHeight)
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, data)

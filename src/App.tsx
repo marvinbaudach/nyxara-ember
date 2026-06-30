@@ -65,7 +65,7 @@ export default function App() {
       <EmberField />
       <FilmOverlay />
 
-      <main id="main" className="relative bg-bg text-ink">
+      <main id="main" tabIndex={-1} className="relative bg-bg text-ink outline-none">
         <Hero onReady={() => { setReady(true); }} />
         <ThesisCallout />
         <SpecsCounter />
