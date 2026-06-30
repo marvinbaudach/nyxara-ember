@@ -29,19 +29,26 @@ const CinematicOrbit = () => {
     return () => { io.disconnect(); }
   }, [])
 
-  // Reduced-motion: don't hijack scroll — just loop the clip gently.
+  // Touch devices (and reduced-motion) don't scrub: scroll-driven video seeking
+  // is too jittery on mobile decoders, and pinning the car through a tall track
+  // forces a long, awkward scroll. Instead just loop the orbit clip gently —
+  // play while the section is on screen, pause otherwise to save battery.
+  const autoplay = reducedMotion || coarse
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !reducedMotion) return
+    if (!video || !autoplay) return
     video.loop = true
-    video.play().catch(() => { /* autoplay may be blocked; poster stays */ })
-  }, [reducedMotion])
+    if (active) video.play().catch(() => { /* autoplay may be blocked; poster stays */ })
+    else video.pause()
+  }, [autoplay, active])
 
-  // The scrub loop: map how far the tall track has scrolled through the
-  // viewport onto the video timeline, easing currentTime toward the target so
-  // fast flicks don't make the seek stutter.
+  // Desktop scrub loop: map how far the tall track has scrolled through the
+  // viewport onto the video timeline. Seeking is expensive, so we never fire a
+  // fresh seek every frame — we gate on the decoder, issuing the next seek only
+  // once the previous one has reported `seeked`. That caps seeks at decoder
+  // throughput (instead of 60/s) while still easing toward the scroll target.
   useEffect(() => {
-    if (!active || reducedMotion) return
+    if (!active || autoplay) return
     const video = videoRef.current
     const track = trackRef.current
     if (!video || !track) return
@@ -52,18 +59,12 @@ const CinematicOrbit = () => {
     // seek threshold below is never crossed, no frame decodes, and the poster
     // lingers until the visitor has scrolled well into the section.
     let primed = false
-    // Mobile decoders can only service one seek at a time; firing a fresh
-    // currentTime every frame queues seeks faster than they complete and the
-    // section stutters. Gate on the decoder: only issue the next seek once the
-    // previous one has reported `seeked`. Cleared by the listener below.
+    // True between issuing a seek and its `seeked` event — the decoder is busy.
     let seeking = false
     const onSeeked = () => { seeking = false; }
-    if (coarse) video.addEventListener('seeked', onSeeked)
+    video.addEventListener('seeked', onSeeked)
 
-    // Skip negligible seeks. Coarse devices use a far larger deadband (~1/24s,
-    // roughly a frame) so a steady scroll produces a handful of seeks per second
-    // instead of 60 — smooth on the decoder, still tracks the scroll.
-    const deadband = coarse ? 0.04 : 0.004
+    const deadband = 0.004
 
     const tick = () => {
       const duration = video.duration
@@ -79,16 +80,13 @@ const CinematicOrbit = () => {
           // Nudge currentTime so the decoder paints a frame over the poster.
           video.currentTime = Math.max(target, 0.001)
           primed = true
-        } else if (coarse) {
-          // Snap straight to target (no easing — easing would mean a stream of
-          // micro-seeks the decoder can't keep up with) and only when idle.
-          if (!seeking && Math.abs(target - cur) > deadband) {
-            seeking = true
-            video.currentTime = target
-          }
-        } else if (Math.abs(target - cur) > deadband) {
-          // Desktop seeks fast enough to ease for buttery-smooth scrubbing.
-          video.currentTime = cur + (target - cur) * 0.15
+          seeking = true
+        } else if (!seeking && Math.abs(target - cur) > deadband) {
+          // Ease toward target, but only once the decoder is idle. A larger
+          // step (0.5) converges in a few decoder-paced seeks rather than a
+          // stream of micro-seeks that stutter.
+          seeking = true
+          video.currentTime = cur + (target - cur) * 0.5
         }
       }
       raf = requestAnimationFrame(tick)
@@ -96,18 +94,20 @@ const CinematicOrbit = () => {
     raf = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(raf)
-      if (coarse) video.removeEventListener('seeked', onSeeked)
+      video.removeEventListener('seeked', onSeeked)
     }
-  }, [active, reducedMotion, coarse])
+  }, [active, autoplay])
 
   return (
     <section
       ref={trackRef}
       aria-label="Cinematic orbit — fly around the Ember"
-      className="relative z-50 h-[200vh] border-y border-hairline bg-bg md:h-[300vh]"
+      className="relative z-50 h-dvh border-y border-hairline bg-bg md:h-[300vh]"
     >
-      {/* Sticky stage holds the viewport-filling clip while the tall track scrolls. */}
-      <div className="ember-stage sticky top-0 h-screen w-full overflow-hidden">
+      {/* Sticky stage holds the viewport-filling clip while the tall track
+          scrolls. dvh (not vh) so the mobile URL bar collapsing/expanding
+          doesn't reflow the stage and jitter the frame up and down. */}
+      <div className="ember-stage sticky top-0 h-dvh w-full overflow-hidden">
         <video
           ref={videoRef}
           // Mobile: the clip is landscape and the stage is a tall portrait
@@ -142,9 +142,11 @@ const CinematicOrbit = () => {
           </p>
         </div>
 
-        <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-[oklch(0.205_0.014_50/0.7)] px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-muted backdrop-blur">
-          Scroll to orbit
-        </div>
+        {!autoplay && (
+          <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-[oklch(0.205_0.014_50/0.7)] px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-muted backdrop-blur">
+            Scroll to orbit
+          </div>
+        )}
       </div>
     </section>
   )
