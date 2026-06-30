@@ -33,6 +33,26 @@ export default function App() {
     return () => { window.clearTimeout(t); }
   }, [])
 
+  // Once the hero is up, warm the cache for the below-the-fold imagery (the
+  // gallery AVIFs + the orbit poster) at low priority. Otherwise they only
+  // start downloading on near-approach (loading="lazy") and pop in mid-reveal.
+  // fetchpriority=low keeps them from competing with the hero clip; type=
+  // image/avif means non-AVIF browsers skip and keep their lazy JPG fallback.
+  useEffect(() => {
+    if (!ready) return
+    const links = ['assets/g1.avif', 'assets/g2.avif', 'assets/g3.avif'].map((href) => {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.type = 'image/avif'
+      link.href = href
+      link.setAttribute('fetchpriority', 'low')
+      document.head.appendChild(link)
+      return link
+    })
+    return () => { links.forEach((l) => { l.remove(); }); }
+  }, [ready])
+
   // Smooth inertia scroll, started once the experience is revealed.
   useEffect(() => {
     if (!ready || reducedMotion) return
