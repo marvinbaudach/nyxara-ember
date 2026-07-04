@@ -29,6 +29,15 @@ const FALLBACK_COUNT = 52
 const SPRITES = 8
 const SPRITE_R = 32
 
+// Flare in over the first 15% of a spark's life, then fade across the rest.
+const sparkFade = (s: Spark) => {
+  const t = s.life / s.max
+  return Math.max(0, t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85)
+}
+
+// Spark hue normalised to 0..1 across the amber → orange range.
+const hueT = (hue: number) => (hue - HUE_MIN) / (HUE_MAX - HUE_MIN)
+
 // ── WebGL2 renderer ─────────────────────────────────────────────────────────
 const VERT = `#version 300 es
 in vec2 a_pos;      // device-pixel position
@@ -106,16 +115,14 @@ const makeGLRenderer = (gl: WebGL2RenderingContext, count: number) => {
     draw(sparks: Spark[], dpr: number) {
       for (let i = 0; i < sparks.length; i++) {
         const s = sparks[i]
-        const t = s.life / s.max
-        const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
-        // amber → warmer orange across the hue range, inlined to avoid a
-        // per-spark, per-frame array allocation in this hot loop.
-        const ct = (s.hue - HUE_MIN) / (HUE_MAX - HUE_MIN)
+        // amber → warmer orange across the hue range, computed component-wise
+        // to avoid a per-spark, per-frame array allocation in this hot loop.
+        const ct = hueT(s.hue)
         const o = i * FLOATS
         data[o] = s.x * dpr
         data[o + 1] = s.y * dpr
         data[o + 2] = s.r * 8 * dpr
-        data[o + 3] = Math.max(0, fade) * 0.9
+        data[o + 3] = sparkFade(s) * 0.9
         data[o + 4] = 1
         data[o + 5] = 0.5 + 0.22 * ct
         data[o + 6] = 0.12 + 0.12 * ct
@@ -159,14 +166,9 @@ const make2DRenderer = (ctx: CanvasRenderingContext2D, dpr: number) => {
       ctx.clearRect(0, 0, w, h)
       ctx.globalCompositeOperation = 'lighter'
       for (const s of sparks) {
-        const t = s.life / s.max
-        const fade = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85
-        const bucket = Math.min(
-          SPRITES - 1,
-          Math.floor(((s.hue - HUE_MIN) / (HUE_MAX - HUE_MIN)) * SPRITES),
-        )
+        const bucket = Math.min(SPRITES - 1, Math.floor(hueT(s.hue) * SPRITES))
         const d = s.r * 8
-        ctx.globalAlpha = Math.max(0, fade) * 0.9
+        ctx.globalAlpha = sparkFade(s) * 0.9
         ctx.drawImage(sprites[bucket], s.x - s.r * 4, s.y - s.r * 4, d, d)
       }
       ctx.globalAlpha = 1

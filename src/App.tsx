@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, MotionConfig } from 'framer-motion'
-import Lenis from 'lenis'
-import { usePrefersReducedMotion } from './hooks'
+import { useLenis } from './hooks'
 import Preloader from './components/Preloader'
 import Hero from './components/Hero'
 import ThesisCallout from './components/ThesisCallout'
@@ -20,7 +19,9 @@ import ScrollProgress from './components/ScrollProgress'
 
 export default function App() {
   const [ready, setReady] = useState(false)
-  const reducedMotion = usePrefersReducedMotion()
+
+  // Smooth inertia scroll, started once the experience is revealed.
+  useLenis(ready)
 
   // Lock scrolling while the loading veil is up.
   useEffect(() => {
@@ -33,14 +34,14 @@ export default function App() {
     return () => { window.clearTimeout(t); }
   }, [])
 
-  // Once the hero is up, warm the cache for the below-the-fold imagery (the
-  // gallery AVIFs + the orbit poster) at low priority. Otherwise they only
-  // start downloading on near-approach (loading="lazy") and pop in mid-reveal.
-  // fetchpriority=low keeps them from competing with the hero clip; type=
-  // image/avif means non-AVIF browsers skip and keep their lazy JPG fallback.
+  // Once the hero is up, warm the cache for the below-the-fold gallery AVIFs
+  // at low priority. Otherwise they only start downloading on near-approach
+  // (loading="lazy") and pop in mid-reveal. fetchpriority=low keeps them from
+  // competing with the hero clip; type=image/avif means non-AVIF browsers skip
+  // and keep their lazy JPG fallback.
   useEffect(() => {
     if (!ready) return
-    const links = ['assets/g1.avif', 'assets/g2.avif', 'assets/g3.avif'].map((href) => {
+    const links = ['assets/g1.avif', 'assets/g2.avif'].map((href) => {
       const link = document.createElement('link')
       link.rel = 'preload'
       link.as = 'image'
@@ -52,16 +53,6 @@ export default function App() {
     })
     return () => { links.forEach((l) => { l.remove(); }); }
   }, [ready])
-
-  // Smooth inertia scroll, started once the experience is revealed.
-  useEffect(() => {
-    if (!ready || reducedMotion) return
-    const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
-    let raf = 0
-    const loop = (t: number) => { lenis.raf(t); raf = requestAnimationFrame(loop) }
-    raf = requestAnimationFrame(loop)
-    return () => { cancelAnimationFrame(raf); lenis.destroy() }
-  }, [ready, reducedMotion])
 
   return (
     // reducedMotion="user" makes every Framer animation honour the OS

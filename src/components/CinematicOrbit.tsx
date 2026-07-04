@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCoarsePointer, usePrefersReducedMotion } from '../hooks'
+import VideoSources from './VideoSources'
 
 // Scroll-scrubbed cinematic orbit. Instead of a live WebGL turntable we play a
 // pre-rendered fly-around video, with the scroll position driving the video's
 // currentTime — so the camera circles the car as the visitor scrolls. This is
 // far lighter than a WebGL canvas (no GPU scene, no per-frame raytracing) and
 // stays smooth as long as the clip is encoded with dense keyframes for seeking.
-const SRC_WEBM = 'assets/orbit.webm'
 const SRC_MP4 = 'assets/orbit.mp4'
 const POSTER = 'assets/g3.jpg'
 
@@ -124,8 +124,7 @@ const CinematicOrbit = () => {
           aria-hidden
           // No controls / no autoplay: scroll drives the frame.
         >
-          <source src={SRC_WEBM} type="video/webm" />
-          <source src={SRC_MP4} type="video/mp4" />
+          <VideoSources mp4={SRC_MP4} />
         </video>
 
         {/* Vignette + heading overlaid on the footage. */}

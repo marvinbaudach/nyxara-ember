@@ -1,20 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
+import VideoSources from './VideoSources'
 
-const SRC_WEBM = 'assets/hero.webm' // VP9 — ~⅓ the size, served first where supported
-const SRC_MP4 = 'assets/hero.mp4' // H.264 — universal fallback
+const SRC_MP4 = 'assets/hero.mp4'
 const POSTER = 'assets/hero_poster.jpg' // first frame — shown until decode catches up
 const FADE = 0.8 // seconds of crossfade at the loop boundary
-
-// Modern source first, then the universal fallback. The browser keeps the first
-// type it can decode.
-const Sources = () => (
-  <>
-    <source src={SRC_WEBM} type="video/webm" />
-    <source src={SRC_MP4} type="video/mp4" />
-  </>
-)
 
 interface HeroProps { onReady?: () => void }
 
@@ -87,17 +78,17 @@ export default function Hero({ onReady }: HeroProps) {
         preload="metadata"
         aria-hidden
       >
-        <Sources />
+        <VideoSources mp4={SRC_MP4} />
       </video>
       {/* Layer A reveals first — gets full preload priority and a poster so the
           frame is visible the instant the loader lifts, before decode catches up. */}
       <video ref={aRef} className={layer} style={{ opacity: 1 }} poster={POSTER} muted playsInline preload="auto" aria-hidden>
-        <Sources />
+        <VideoSources mp4={SRC_MP4} />
       </video>
       {/* Layer B only matters near the first loop boundary (~7s in), by which time
           A has buffered the same file. preload="none" keeps it off the critical path. */}
       <video ref={bRef} className={layer} style={{ opacity: 0 }} muted playsInline preload="none" aria-hidden>
-        <Sources />
+        <VideoSources mp4={SRC_MP4} />
       </video>
 
       {/* soft dark contrast halo so the wordmark never washes out */}

@@ -1,4 +1,5 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useSyncExternalStore } from 'react'
+import Lenis from 'lenis'
 
 // Subscribe a component to a CSS media query, re-rendering only when it flips.
 // useSyncExternalStore keeps it tear-free and SSR-safe (falls back to `false`
@@ -26,4 +27,18 @@ export const useCoarsePointer = (): boolean => {
   const coarse = useMediaQuery('(pointer: coarse)')
   const anyFine = useMediaQuery('(any-pointer: fine)')
   return coarse && !anyFine
+}
+
+// Smooth inertia scroll. Instantiated only while enabled (and torn down on
+// disable), and skipped entirely under reduced-motion.
+export const useLenis = (enabled: boolean) => {
+  const reducedMotion = usePrefersReducedMotion()
+  useEffect(() => {
+    if (!enabled || reducedMotion) return
+    const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
+    let raf = 0
+    const loop = (t: number) => { lenis.raf(t); raf = requestAnimationFrame(loop) }
+    raf = requestAnimationFrame(loop)
+    return () => { cancelAnimationFrame(raf); lenis.destroy() }
+  }, [enabled, reducedMotion])
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import VideoSources from './VideoSources'
 
 interface LazyVideoProps {
   src: string
@@ -55,9 +56,6 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
     return () => { preBuffer.disconnect(); playback.disconnect(); }
   }, [])
 
-  // `src` is the universal MP4; the matching VP9/WebM is served first.
-  const webm = src.replace(/\.mp4$/, '.webm')
-
   return (
     <video
       ref={ref}
@@ -69,8 +67,7 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
       aria-hidden
       className={className}
     >
-      <source src={webm} type="video/webm" />
-      <source src={src} type="video/mp4" />
+      <VideoSources mp4={src} />
     </video>
   )
 }
