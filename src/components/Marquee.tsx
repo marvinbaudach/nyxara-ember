@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import {
   motion,
   useScroll,
@@ -7,6 +7,7 @@ import {
   useTransform,
   useAnimationFrame,
   useMotionValue,
+  type MotionValue,
 } from 'framer-motion'
 import { usePrefersReducedMotion } from '../hooks'
 
@@ -16,9 +17,17 @@ import { usePrefersReducedMotion } from '../hooks'
 // the page never repeats its own figures.
 const PHRASE = ['Ninety-nine will burn', 'No more', 'Built in the dark', 'Driven once, at night']
 
-export default function Marquee() {
-  const reduced = usePrefersReducedMotion()
-  const baseX = useMotionValue(0)
+interface DriveProps {
+  baseX: MotionValue<number>
+  sectionRef: RefObject<HTMLElement | null>
+  trackRef: RefObject<HTMLDivElement | null>
+}
+
+// All of the marquee's motion work lives here and renders nothing, so it is only
+// mounted while it is needed: under reduced motion the strip stays still and none
+// of the scroll-velocity springs or frame callbacks exist, and while the strip is
+// offscreen the frame callback does no work.
+const MarqueeDrive = ({ baseX, sectionRef, trackRef }: DriveProps) => {
   const { scrollY } = useScroll()
   const scrollVelocity = useVelocity(scrollY)
   const smooth = useSpring(scrollVelocity, { damping: 50, stiffness: 400 })
@@ -27,22 +36,30 @@ export default function Marquee() {
 
   const directionRef = useRef(1)
   const widthRef = useRef(0)
-  const innerRef = useRef<HTMLDivElement>(null)
+  const visibleRef = useRef(false)
 
   useEffect(() => {
     const measure = () => {
       // The track holds two identical sequences; half its width is one loop.
-      if (innerRef.current) widthRef.current = innerRef.current.scrollWidth / 2
+      if (trackRef.current) widthRef.current = trackRef.current.scrollWidth / 2
     }
     measure()
     window.addEventListener('resize', measure)
-    return () => { window.removeEventListener('resize', measure) }
-  }, [])
+
+    const section = sectionRef.current
+    const observer = new IntersectionObserver(([entry]) => { visibleRef.current = entry.isIntersecting })
+    if (section) observer.observe(section)
+
+    return () => {
+      window.removeEventListener('resize', measure)
+      observer.disconnect()
+      baseX.set(0) // back to the static strip when reduced motion switches on
+    }
+  }, [baseX, sectionRef, trackRef])
 
   useAnimationFrame((_, delta) => {
-    if (reduced) return
     const w = widthRef.current
-    if (!w) return
+    if (!w || !visibleRef.current) return
     let move = directionRef.current * 0.04 * delta // steady drift
     const f = factor.get()
     if (f < 0) directionRef.current = -1
@@ -56,15 +73,26 @@ export default function Marquee() {
     baseX.set(next)
   })
 
+  return null
+}
+
+export default function Marquee() {
+  const reduced = usePrefersReducedMotion()
+  const baseX = useMotionValue(0)
+  const sectionRef = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+
   const items = [...PHRASE, ...PHRASE]
 
   return (
     <section
+      ref={sectionRef}
       aria-hidden
       className="relative overflow-hidden border-y border-hairline bg-bg py-[clamp(1.4rem,3vw,2.4rem)]"
     >
+      {!reduced && <MarqueeDrive baseX={baseX} sectionRef={sectionRef} trackRef={trackRef} />}
       <motion.div
-        ref={innerRef}
+        ref={trackRef}
         className="flex whitespace-nowrap will-change-transform"
         style={{ x: baseX }}
       >

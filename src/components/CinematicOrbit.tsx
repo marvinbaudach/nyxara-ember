@@ -105,7 +105,7 @@ const CinematicOrbit = () => {
   return (
     <section
       ref={trackRef}
-      aria-label="Orbit view of the Ember"
+      aria-labelledby="orbit-heading"
       className={`relative z-50 h-dvh border-y border-hairline bg-bg ${reducedMotion ? '' : 'md:h-[300vh]'}`}
     >
       {/* Sticky stage holds the viewport-filling clip while the tall track
@@ -137,7 +137,7 @@ const CinematicOrbit = () => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-gradient-to-b from-[oklch(0.12_0.012_50/0.85)] via-[oklch(0.12_0.012_50/0.5)] to-transparent" />
 
         <div className="wrap pointer-events-none absolute inset-x-0 top-0 pt-16 md:pt-24">
-          <h2 className="font-display text-[clamp(2rem,4.5vw,3.75rem)] leading-[1.05] text-ink">
+          <h2 id="orbit-heading" className="font-display text-[clamp(2rem,4.5vw,3.75rem)] leading-[1.05] text-ink">
             Every angle, <span className="text-accent">in your hands</span>
           </h2>
           <p className="mt-4 max-w-xl font-sans text-[clamp(1rem,1.4vw,1.1rem)] text-ink/85">
