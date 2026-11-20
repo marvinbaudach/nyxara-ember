@@ -16,6 +16,7 @@ interface HeroProps { onReady?: () => void }
 export default function Hero({ onReady }: HeroProps) {
   const aRef = useRef<HTMLVideoElement>(null)
   const bRef = useRef<HTMLVideoElement>(null)
+  const fillRef = useRef<HTMLVideoElement>(null)
   const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
@@ -24,7 +25,11 @@ export default function Hero({ onReady }: HeroProps) {
     if (!a || !b) return
 
     // Reduced motion: the poster is the hero. Nothing plays, so lift the loader now.
+    // Switching it on mid-session also stops whatever is already playing.
     if (reduced) {
+      a.pause()
+      b.pause()
+      fillRef.current?.pause()
       onReady?.()
       return
     }
@@ -77,6 +82,7 @@ export default function Hero({ onReady }: HeroProps) {
           it loads at metadata priority (it is display:none on landscape) and
           never competes with layer A for the first playable frame. */}
       <video
+        ref={fillRef}
         className="absolute inset-0 z-0 hidden h-full w-full scale-110 object-cover brightness-[0.55] blur-2xl portrait:block"
         poster={POSTER}
         muted
@@ -100,8 +106,9 @@ export default function Hero({ onReady }: HeroProps) {
       </video>
 
       {/* soft dark contrast halo so the wordmark never washes out */}
+      <div className="absolute inset-0 z-10 bg-bg/25 portrait:bg-bg/45" />
       <div
-        className="absolute inset-0 z-10 bg-bg/25 portrait:bg-bg/45"
+        className="absolute inset-0 z-10"
         style={{
           background:
             'radial-gradient(58% 68% at 50% 56%, oklch(0.11 0.01 50 / 0.74) 0%, oklch(0.11 0.01 50 / 0.32) 45%, oklch(0.11 0.01 50 / 0) 74%), linear-gradient(to bottom, oklch(0.13 0.01 50 / 0.5), oklch(0.13 0.01 50 / 0.08) 28%, oklch(0.13 0.01 50 / 0.1) 70%, oklch(0.13 0.01 50 / 0.75))',

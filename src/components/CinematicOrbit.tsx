@@ -37,11 +37,14 @@ const CinematicOrbit = () => {
   const autoplay = coarse && !reducedMotion
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !autoplay) return
+    if (!video) return
+    // Reduced motion switched on mid-session: stop a clip that is already looping.
+    if (reducedMotion) video.pause()
+    if (!autoplay) return
     video.loop = true
     if (active) video.play().catch(() => { /* autoplay may be blocked; poster stays */ })
     else video.pause()
-  }, [autoplay, active])
+  }, [autoplay, active, reducedMotion])
 
   // Desktop scrub loop: map how far the tall track has scrolled through the
   // viewport onto the video timeline. Seeking is expensive, so we never fire a

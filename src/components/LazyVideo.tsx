@@ -22,8 +22,13 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
 
   useEffect(() => {
     const v = ref.current
+    if (!v) return
     // Reduced motion: the poster stands in for the clip, nothing loads or plays.
-    if (!v || reduced) return
+    // Switching it on mid-session also stops a clip that is already running.
+    if (reduced) {
+      v.pause()
+      return
+    }
 
     const preBuffer = new IntersectionObserver(
       (entries) => {

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
+import { usePrefersReducedMotion } from '../hooks'
 import { lqip } from '../lqip.generated'
 
 interface FeatureBlockProps {
@@ -17,11 +18,12 @@ const FeatureBlock = ({ img, alt, heading, body, reverse }: FeatureBlockProps) =
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
   const avif = img.replace(/\.jpg$/, '.avif')
+  const reduced = usePrefersReducedMotion()
   const key = img.replace(/^.*\/|\.jpg$/g, '') // e.g. assets/g1.jpg → g1
 
   return (
     <motion.div
-      initial="hidden"
+      initial={reduced ? 'show' : 'hidden'}
       whileInView="show"
       viewport={{ once: true, amount: 0.25 }}
       className={`relative grid w-full items-center gap-[clamp(2rem,5vw,5rem)] border-t border-hairline pt-[clamp(4rem,9vh,9rem)] md:grid-cols-2 ${
