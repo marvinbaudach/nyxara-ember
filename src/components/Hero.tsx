@@ -173,7 +173,7 @@ export default function Hero({ onReady }: HeroProps) {
             transition={{ delay: 0.9, duration: 1 }}
             className="mt-7 font-mono text-[0.8rem] uppercase tracking-[0.22em] text-ink/90 sm:tracking-[0.42em]"
           >
-            Ninety nine will <span className="text-accent">burn</span>. No more.
+            Ninety-nine will <span className="text-accent">burn</span>. No more.
           </motion.p>
         </div>
       </div>

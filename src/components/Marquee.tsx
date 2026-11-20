@@ -14,7 +14,7 @@ import { usePrefersReducedMotion } from '../hooks'
 // it speeds up and reverses with the scroll direction. It carries the model's
 // mantra. The hard numbers live in SpecsCounter, so this stays brand voice and
 // the page never repeats its own figures.
-const PHRASE = ['Ninety nine will burn', 'No more', 'Built in the dark', 'Driven once, at night']
+const PHRASE = ['Ninety-nine will burn', 'No more', 'Built in the dark', 'Driven once, at night']
 
 export default function Marquee() {
   const reduced = usePrefersReducedMotion()

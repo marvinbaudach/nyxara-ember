@@ -1,7 +1,7 @@
 interface Row { h: string; t: string }
 
 // Not a spec sheet — those numbers live in SpecsCounter. These three rows are
-// the covenant: what makes each Ember provably one of ninety nine, not just fast.
+// the covenant: what makes each Ember provably one of ninety-nine, not just fast.
 const rows: Row[] = [
   {
     h: 'Timed and witnessed',
@@ -12,7 +12,7 @@ const rows: Row[] = [
     t: 'The owner’s name and the date of the car’s first night run would be laser cut into the sill. It is the only place the Ember says who it belongs to.',
   },
   {
-    h: 'Closed at ninety nine',
+    h: 'Closed at ninety-nine',
     t: 'At the ninety ninth car the tooling would be destroyed at the final build. There is no continuation series, no revival, no hundredth.',
   },
 ]
