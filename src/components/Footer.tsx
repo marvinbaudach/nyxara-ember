@@ -2,6 +2,10 @@ export default function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-hairline pb-12 pt-[clamp(4rem,9vh,7rem)]">
       <div className="wrap">
+        <p className="mx-auto mb-[clamp(3rem,7vh,6rem)] max-w-[40ch] text-pretty text-center font-sans text-[clamp(1rem,2.2vw,1.35rem)] leading-snug text-ink/80">
+          Built in the dark. Then the tooling burns.
+        </p>
+
         {/* Oversized wordmark — the closing frame of the film. */}
         <p
           className="select-none whitespace-nowrap text-center font-display font-light leading-[0.8] tracking-[0.02em] text-[clamp(3.5rem,15.5vw,15rem)] text-ink/90"

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
 import { usePrefersReducedMotion } from '../hooks'
@@ -6,6 +7,7 @@ import { lqip } from '../lqip.generated'
 interface FeatureBlockProps {
   img: string
   alt: string
+  caption?: ReactNode
   heading: string
   body: string
   reverse?: boolean
@@ -16,7 +18,7 @@ interface FeatureBlockProps {
 // it stays smooth and warning free. The text is always in place. Reduced motion
 // is read live: the wipe gets a zero-length transition, so it snaps to the end
 // state even when the preference flips after mount.
-const FeatureBlock = ({ img, alt, heading, body, reverse }: FeatureBlockProps) => {
+const FeatureBlock = ({ img, alt, caption, heading, body, reverse }: FeatureBlockProps) => {
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
   const avif = img.replace(/\.jpg$/, '.avif')
@@ -50,6 +52,11 @@ const FeatureBlock = ({ img, alt, heading, body, reverse }: FeatureBlockProps) =
             className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
           />
         </picture>
+        {caption && (
+          <figcaption className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[oklch(0.11_0.01_50/0.9)] to-transparent p-6 font-mono text-[clamp(0.7rem,1.1vw,0.85rem)] font-medium uppercase tracking-[0.22em]">
+            {caption}
+          </figcaption>
+        )}
       </figure>
       <div>
         <h2 className="font-display text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.05]">{heading}</h2>
@@ -65,6 +72,7 @@ const FeaturePairs = () => {
       <FeatureBlock
         img="assets/g1.jpg"
         alt="The Ember low inside a dark concrete tunnel at night"
+        caption={<>1340 horses, <span className="text-accent">unleashed</span></>}
         heading="Born in the dark"
         body="Each Ember would be shaped in a sealed chamber across eleven weeks, and driven once at night before it is finished."
       />
