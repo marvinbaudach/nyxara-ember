@@ -47,7 +47,10 @@ const MarqueeDrive = ({ baseX, sectionRef, trackRef }: DriveProps) => {
     window.addEventListener('resize', measure)
 
     const section = sectionRef.current
-    const observer = new IntersectionObserver(([entry]) => { visibleRef.current = entry.isIntersecting })
+    const observer = new IntersectionObserver((entries) => {
+      // Entries arrive oldest first; the last one is the current state.
+      visibleRef.current = entries[entries.length - 1].isIntersecting
+    })
     if (section) observer.observe(section)
 
     return () => {

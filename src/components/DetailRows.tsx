@@ -13,7 +13,7 @@ const rows: Row[] = [
   },
   {
     h: 'Closed at ninety-nine',
-    t: 'At the ninety ninth car the tooling would be destroyed at the final build. There is no continuation series, no revival, no hundredth.',
+    t: 'At the ninety-ninth car the tooling would be destroyed at the final build. There is no continuation series, no revival, no hundredth.',
   },
 ]
 

@@ -8,14 +8,21 @@ const SRC_MP4 = 'assets/hero.mp4'
 const POSTER = 'assets/hero_poster.jpg' // first frame — shown until decode catches up
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
-// Resolves once the poster is decoded (or failed — never trap the loader on it),
-// so the veil lifts onto a hero that already shows its first frame.
+const POSTER_WAIT = 1500 // ms the loader will wait on a slow poster before lifting anyway
+
+// Resolves once the poster is loaded and decoded, so the veil lifts onto a hero
+// that already shows its first frame. It always resolves — on error, without
+// decode(), or after POSTER_WAIT — so a bad poster can never trap the loader.
 let posterReady: Promise<void> | null = null
 const whenPosterReady = (): Promise<void> => {
   posterReady ??= new Promise<void>((resolve) => {
+    const timer = window.setTimeout(resolve, POSTER_WAIT)
+    const done = () => { window.clearTimeout(timer); resolve() }
     const img = new Image()
+    img.onerror = done
     img.src = POSTER
-    img.decode().then(resolve, resolve)
+    if (typeof img.decode === 'function') img.decode().then(done, done)
+    else img.onload = done
   })
   return posterReady
 }
@@ -43,7 +50,10 @@ export default function Hero({ onReady }: HeroProps) {
     const b = bRef.current
     if (!a || !b) return
     let cancelled = false
-    const lift = () => { void whenPosterReady().then(() => { if (!cancelled) onReadyRef.current?.() }) }
+    const lift = () => {
+      const fire = () => { if (!cancelled) onReadyRef.current?.() }
+      whenPosterReady().then(fire, fire)
+    }
 
     // Reduced motion: the poster is the hero. Nothing plays, so lift the loader now.
     // Switching it on mid-session also stops whatever is already playing.
@@ -109,6 +119,8 @@ export default function Hero({ onReady }: HeroProps) {
 
     return () => {
       cancelled = true
+      a.removeEventListener('playing', lift)
+      a.removeEventListener('canplaythrough', lift)
       cancelAnimationFrame(raf)
       window.removeEventListener('pointerdown', onTouch)
       portrait.removeEventListener('change', resumeFill)
