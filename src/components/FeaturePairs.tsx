@@ -13,7 +13,9 @@ interface FeatureBlockProps {
 
 // The image is revealed by a clip-path that sweeps open horizontally as the
 // block enters the viewport. Uses whileInView (no scroll-linked measurement) so
-// it stays smooth and warning free. The text is always in place.
+// it stays smooth and warning free. The text is always in place. Reduced motion
+// is read live: the wipe gets a zero-length transition, so it snaps to the end
+// state even when the preference flips after mount.
 const FeatureBlock = ({ img, alt, heading, body, reverse }: FeatureBlockProps) => {
   const from = reverse ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
   const to = 'inset(0 0 0 0)'
@@ -44,7 +46,7 @@ const FeatureBlock = ({ img, alt, heading, body, reverse }: FeatureBlockProps) =
             loading="lazy"
             decoding="async"
             variants={{ hidden: { clipPath: from, scale: 1.06 }, show: { clipPath: to, scale: 1 } }}
-            transition={{ duration: 1.1, ease }}
+            transition={reduced ? { duration: 0 } : { duration: 1.1, ease }}
             className="block h-[clamp(300px,52vh,560px)] w-full object-cover"
           />
         </picture>
@@ -64,7 +66,7 @@ const FeaturePairs = () => {
         img="assets/g1.jpg"
         alt="The Ember low inside a dark concrete tunnel at night"
         heading="Born in the dark"
-        body="Each Ember is shaped in a sealed chamber across eleven weeks, then driven once at night before it ships."
+        body="Each Ember is shaped in a sealed chamber across eleven weeks, then driven once at night before it is finished."
       />
       <FeatureBlock
         reverse

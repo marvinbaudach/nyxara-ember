@@ -41,6 +41,9 @@ export default function Hero({ onReady }: HeroProps) {
 
     const kick = (v: HTMLVideoElement) => v.play().catch(() => {})
     void kick(a)
+    // The fill layer autoplays only at mount; resume it when reduced motion
+    // goes back off after having paused it.
+    if (fillRef.current) void kick(fillRef.current)
 
     // Tell the app the hero is showing real frames so the loader can lift.
     const signalReady = () => onReady?.()
