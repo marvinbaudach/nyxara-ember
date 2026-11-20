@@ -1,9 +1,11 @@
-// Primary action: a flat bordered button that fills on hover and presses on click.
-const ReserveButton = ({ children }: { children: string }) => (
+// Primary action, shown as a concept: aria-disabled keeps it focusable so the
+// note it points to is reachable, and it carries no hover fill or press state.
+const ReserveButton = ({ children, describedBy }: { children: string; describedBy: string }) => (
   <button
     type="button"
-    data-cursor
-    className="border border-accent bg-transparent px-10 py-4 font-sans text-[1.05rem] font-medium text-ink transition-[background-color,color,transform] duration-200 hover:bg-accent hover:text-bg active:translate-y-px"
+    aria-disabled="true"
+    aria-describedby={describedBy}
+    className="cursor-default border border-accent bg-transparent px-10 py-4 font-sans text-[1.05rem] font-medium text-ink"
   >
     {children}
   </button>
@@ -20,7 +22,10 @@ const CTA = () => {
         A refundable deposit holds one of ninety nine slots. We build in the order the deposits land.
       </p>
       <div className="mt-10">
-        <ReserveButton>Request your Ember</ReserveButton>
+        <ReserveButton describedBy="reserve-note">Request your Ember</ReserveButton>
+        <p id="reserve-note" className="mt-4 max-w-[44ch] font-sans text-[0.9rem] text-muted">
+          This is a design concept. Nothing can be ordered.
+        </p>
       </div>
     </section>
   )

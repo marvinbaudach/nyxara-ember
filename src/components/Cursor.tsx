@@ -30,13 +30,14 @@ export default function Cursor() {
     // Hover state is detected by delegation: pointerover/out fire only when the
     // pointer crosses an element boundary, not on every pixel — so the costly
     // closest() walk runs a handful of times instead of hundreds per second.
+    const interactive = 'a, button:not([aria-disabled="true"]), [data-cursor]'
     const over = (e: PointerEvent) => {
       const el = e.target as HTMLElement | null
-      if (el?.closest('a, button, [data-cursor]')) setActive(true)
+      if (el?.closest(interactive)) setActive(true)
     }
     const out = (e: PointerEvent) => {
       const el = e.target as HTMLElement | null
-      if (el?.closest('a, button, [data-cursor]')) setActive(false)
+      if (el?.closest(interactive)) setActive(false)
     }
     const onDown = () => { setDown(true) }
     const onUp = () => { setDown(false) }
