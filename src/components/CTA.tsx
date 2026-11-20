@@ -22,7 +22,7 @@ const CTA = () => {
         On paper, ninety nine cars would be built, each finished with one night drive. No cars exist and nothing is for sale.
       </p>
       <div className="mt-10">
-        <ReserveButton describedBy="reserve-note">Request your Ember</ReserveButton>
+        <ReserveButton describedBy="reserve-note">View the concept</ReserveButton>
         <p id="reserve-note" className="mt-4 max-w-[44ch] font-sans text-[0.9rem] text-muted">
           This is a design concept. Nothing can be ordered.
         </p>

@@ -14,7 +14,7 @@ const specs: Spec[] = [
   { value: 1340, decimals: 0, suffix: 'hp', label: 'Twin afterburners' },
   { value: 2.1, decimals: 1, suffix: 's', label: 'Zero to sixty' },
   { value: 310, decimals: 0, suffix: 'mph', label: 'Before the limiter' },
-  { value: 99, decimals: 0, suffix: '', label: 'Built, then never again' },
+  { value: 99, decimals: 0, suffix: '', label: 'Designed to be built once' },
 ]
 
 // One animated numeral. Counts up from zero the first time it scrolls in.

@@ -66,7 +66,7 @@ const FeaturePairs = () => {
         img="assets/g1.jpg"
         alt="The Ember low inside a dark concrete tunnel at night"
         heading="Born in the dark"
-        body="Each Ember is shaped in a sealed chamber across eleven weeks, then driven once at night before it is finished."
+        body="Each Ember would be shaped in a sealed chamber across eleven weeks, and driven once at night before it is finished."
       />
       <FeatureBlock
         reverse
