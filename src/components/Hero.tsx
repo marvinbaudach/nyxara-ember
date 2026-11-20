@@ -8,6 +8,18 @@ const SRC_MP4 = 'assets/hero.mp4'
 const POSTER = 'assets/hero_poster.jpg' // first frame — shown until decode catches up
 const FADE = 0.8 // seconds of crossfade at the loop boundary
 
+// Resolves once the poster is decoded (or failed — never trap the loader on it),
+// so the veil lifts onto a hero that already shows its first frame.
+let posterReady: Promise<void> | null = null
+const whenPosterReady = (): Promise<void> => {
+  posterReady ??= new Promise<void>((resolve) => {
+    const img = new Image()
+    img.src = POSTER
+    img.decode().then(resolve, resolve)
+  })
+  return posterReady
+}
+
 interface HeroProps { onReady?: () => void }
 
 // Ambient cinematic hero. The driving take is a single continuous shot, so its
@@ -30,6 +42,8 @@ export default function Hero({ onReady }: HeroProps) {
     const a = aRef.current
     const b = bRef.current
     if (!a || !b) return
+    let cancelled = false
+    const lift = () => { void whenPosterReady().then(() => { if (!cancelled) onReadyRef.current?.() }) }
 
     // Reduced motion: the poster is the hero. Nothing plays, so lift the loader now.
     // Switching it on mid-session also stops whatever is already playing.
@@ -40,8 +54,8 @@ export default function Hero({ onReady }: HeroProps) {
         fillRef.current.pause()
         fillPausedRef.current = true
       }
-      onReadyRef.current?.()
-      return
+      lift()
+      return () => { cancelled = true }
     }
 
     // Earlier effect runs may have swapped layers; the visible one (opacity 1)
@@ -56,17 +70,22 @@ export default function Hero({ onReady }: HeroProps) {
     void kick(active)
     // The fill layer autoplays only at mount; resume it when reduced motion
     // goes back off after having paused it, and only where it is displayed
-    // (portrait) so it never downloads or decodes on landscape.
-    const fill = fillRef.current
-    if (fill && fillPausedRef.current && getComputedStyle(fill).display !== 'none') {
-      fillPausedRef.current = false
-      void kick(fill)
+    // (portrait) so it never downloads or decodes on landscape. If we are in
+    // landscape right now, wait for the rotation to portrait instead.
+    const portrait = window.matchMedia('(orientation: portrait)')
+    const resumeFill = () => {
+      const fill = fillRef.current
+      if (fill && fillPausedRef.current && portrait.matches) {
+        fillPausedRef.current = false
+        void kick(fill)
+      }
     }
+    resumeFill()
+    portrait.addEventListener('change', resumeFill)
 
-    // Tell the app the hero is showing real frames so the loader can lift.
-    const signalReady = () => onReadyRef.current?.()
-    a.addEventListener('playing', signalReady, { once: true })
-    a.addEventListener('canplaythrough', signalReady, { once: true })
+    // Tell the app the hero is showing real frames (and its poster) so the loader can lift.
+    a.addEventListener('playing', lift, { once: true })
+    a.addEventListener('canplaythrough', lift, { once: true })
 
     const tick = () => {
       const v = active
@@ -88,7 +107,12 @@ export default function Hero({ onReady }: HeroProps) {
     const onTouch = () => { void kick(active); window.removeEventListener('pointerdown', onTouch) }
     window.addEventListener('pointerdown', onTouch)
 
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf)
+      window.removeEventListener('pointerdown', onTouch)
+      portrait.removeEventListener('change', resumeFill)
+    }
   }, [reduced])
 
   // Landscape footage in a portrait phone viewport: object-cover would zoom to
@@ -110,14 +134,14 @@ export default function Hero({ onReady }: HeroProps) {
         loop
         autoPlay={!reduced}
         playsInline
-        preload="metadata"
+        preload={reduced ? 'none' : 'metadata'}
         aria-hidden
       >
         <VideoSources mp4={SRC_MP4} />
       </video>
       {/* Layer A reveals first — gets full preload priority and a poster so the
           frame is visible the instant the loader lifts, before decode catches up. */}
-      <video ref={aRef} className={layer} style={{ opacity: 1 }} poster={POSTER} muted playsInline preload="auto" aria-hidden>
+      <video ref={aRef} className={layer} style={{ opacity: 1 }} poster={POSTER} muted playsInline preload={reduced ? 'none' : 'auto'} aria-hidden>
         <VideoSources mp4={SRC_MP4} />
       </video>
       {/* Layer B only matters near the first loop boundary (~7s in), by which time
@@ -126,13 +150,15 @@ export default function Hero({ onReady }: HeroProps) {
         <VideoSources mp4={SRC_MP4} />
       </video>
 
-      {/* soft dark contrast halo so the wordmark never washes out */}
-      <div className="absolute inset-0 z-10 bg-bg/25 portrait:bg-bg/45" />
+      {/* Soft dark contrast halo so the wordmark never washes out. Portrait shows
+          the clip as a short letterboxed strip, so its scrim (the --scrim-* stops)
+          hugs the text band and leaves the blurred fill and strip edges lighter. */}
+      <div className="absolute inset-0 z-10 bg-bg/25 portrait:bg-bg/[0.1]" />
       <div
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-10 [--scrim-bottom:0.75] [--scrim-core:0.74] [--scrim-cy:56%] [--scrim-mid:0.32] [--scrim-size:58%_68%] [--scrim-top:0.5] portrait:[--scrim-bottom:0.45] portrait:[--scrim-core:0.66] portrait:[--scrim-cy:50%] portrait:[--scrim-mid:0.46] portrait:[--scrim-size:85%_30%] portrait:[--scrim-top:0.3]"
         style={{
           background:
-            'radial-gradient(58% 68% at 50% 56%, oklch(0.11 0.01 50 / 0.74) 0%, oklch(0.11 0.01 50 / 0.32) 45%, oklch(0.11 0.01 50 / 0) 74%), linear-gradient(to bottom, oklch(0.13 0.01 50 / 0.5), oklch(0.13 0.01 50 / 0.08) 28%, oklch(0.13 0.01 50 / 0.1) 70%, oklch(0.13 0.01 50 / 0.75))',
+            'radial-gradient(var(--scrim-size) at 50% var(--scrim-cy), oklch(0.11 0.01 50 / var(--scrim-core)) 0%, oklch(0.11 0.01 50 / var(--scrim-mid)) 45%, oklch(0.11 0.01 50 / 0) 74%), linear-gradient(to bottom, oklch(0.13 0.01 50 / var(--scrim-top)), oklch(0.13 0.01 50 / 0.08) 28%, oklch(0.13 0.01 50 / 0.1) 70%, oklch(0.13 0.01 50 / var(--scrim-bottom)))',
         }}
       />
 
@@ -171,7 +197,7 @@ export default function Hero({ onReady }: HeroProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9, duration: 1 }}
-            className="mt-7 font-mono text-[0.8rem] uppercase tracking-[0.22em] text-ink/90 sm:tracking-[0.42em]"
+            className="mt-7 font-mono text-[0.8rem] uppercase tracking-[0.22em] text-ink/90 portrait:text-ink sm:tracking-[0.42em]"
           >
             Ninety-nine will <span className="text-accent">burn</span>. No more.
           </motion.p>
@@ -182,7 +208,7 @@ export default function Hero({ onReady }: HeroProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 1 }}
-        className="absolute bottom-[4vh] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3"
+        className="absolute bottom-[4vh] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3 [@media(max-height:32rem)]:hidden"
       >
         <span className="font-mono text-[0.75rem] uppercase tracking-[0.36em] text-muted">Scroll</span>
         <motion.span
