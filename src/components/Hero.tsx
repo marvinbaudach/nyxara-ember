@@ -17,7 +17,14 @@ export default function Hero({ onReady }: HeroProps) {
   const aRef = useRef<HTMLVideoElement>(null)
   const bRef = useRef<HTMLVideoElement>(null)
   const fillRef = useRef<HTMLVideoElement>(null)
+  // Set when the reduced-motion branch paused the fill layer, so only that
+  // pause is ever undone (the fill must never start on its own after mount).
+  const fillPausedRef = useRef(false)
+  // Read through a ref so a new callback identity never re-runs the effect.
+  const onReadyRef = useRef(onReady)
   const reduced = usePrefersReducedMotion()
+
+  useEffect(() => { onReadyRef.current = onReady }, [onReady])
 
   useEffect(() => {
     const a = aRef.current
@@ -29,24 +36,35 @@ export default function Hero({ onReady }: HeroProps) {
     if (reduced) {
       a.pause()
       b.pause()
-      fillRef.current?.pause()
-      onReady?.()
+      if (fillRef.current) {
+        fillRef.current.pause()
+        fillPausedRef.current = true
+      }
+      onReadyRef.current?.()
       return
     }
 
-    let active: HTMLVideoElement = a
-    let idle: HTMLVideoElement = b
+    // Earlier effect runs may have swapped layers; the visible one (opacity 1)
+    // is the active one, so resume that instead of assuming A.
+    const bVisible = b.style.opacity === '1'
+    let active: HTMLVideoElement = bVisible ? b : a
+    let idle: HTMLVideoElement = bVisible ? a : b
     let swapping = false
     let raf = 0
 
     const kick = (v: HTMLVideoElement) => v.play().catch(() => {})
-    void kick(a)
+    void kick(active)
     // The fill layer autoplays only at mount; resume it when reduced motion
-    // goes back off after having paused it.
-    if (fillRef.current) void kick(fillRef.current)
+    // goes back off after having paused it, and only where it is displayed
+    // (portrait) so it never downloads or decodes on landscape.
+    const fill = fillRef.current
+    if (fill && fillPausedRef.current && getComputedStyle(fill).display !== 'none') {
+      fillPausedRef.current = false
+      void kick(fill)
+    }
 
     // Tell the app the hero is showing real frames so the loader can lift.
-    const signalReady = () => onReady?.()
+    const signalReady = () => onReadyRef.current?.()
     a.addEventListener('playing', signalReady, { once: true })
     a.addEventListener('canplaythrough', signalReady, { once: true })
 
@@ -71,7 +89,7 @@ export default function Hero({ onReady }: HeroProps) {
     window.addEventListener('pointerdown', onTouch)
 
     return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
-  }, [onReady, reduced])
+  }, [reduced])
 
   // Landscape footage in a portrait phone viewport: object-cover would zoom to
   // fill height and crop the car's length away. On portrait we switch the sharp

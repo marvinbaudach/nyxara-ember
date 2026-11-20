@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, MotionConfig } from 'framer-motion'
 import { useLenis } from './hooks'
 import Preloader from './components/Preloader'
@@ -19,6 +19,7 @@ import ScrollProgress from './components/ScrollProgress'
 
 export default function App() {
   const [ready, setReady] = useState(false)
+  const handleReady = useCallback(() => { setReady(true); }, [])
 
   // Smooth inertia scroll, started once the experience is revealed.
   useLenis(ready)
@@ -77,7 +78,7 @@ export default function App() {
       <FilmOverlay />
 
       <main id="main" tabIndex={-1} className="relative bg-bg text-ink outline-none">
-        <Hero onReady={() => { setReady(true); }} />
+        <Hero onReady={handleReady} />
         <ThesisCallout />
         <SpecsCounter />
         <Marquee />
