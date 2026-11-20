@@ -9,11 +9,11 @@ const rows: Row[] = [
   },
   {
     h: 'Etched into the sill',
-    t: 'Your name and the date of the car’s first night run are laser cut into the sill. It is the only place the Ember says who it belongs to.',
+    t: 'The owner’s name and the date of the car’s first night run would be laser cut into the sill. It is the only place the Ember says who it belongs to.',
   },
   {
     h: 'Closed at ninety nine',
-    t: 'At the ninety ninth car the tooling is destroyed in front of the owners. There is no continuation series, no revival, no hundredth.',
+    t: 'At the ninety ninth car the tooling is destroyed at the final build. There is no continuation series, no revival, no hundredth.',
   },
 ]
 
