@@ -1,39 +1,35 @@
-interface Row { n: string; h: string; t: string }
+interface Row { h: string; t: string }
 
 // Not a spec sheet — those numbers live in SpecsCounter. These three rows are
 // the covenant: what makes each Ember provably one of ninety nine, not just fast.
 const rows: Row[] = [
   {
-    n: '01',
-    h: 'Witnessed, not claimed',
-    t: 'Every figure on this page was timed on a sealed runway and signed off by two independent observers. No press launch, no estimates.',
+    h: 'Timed and witnessed',
+    t: 'Every figure on this page was timed on a sealed runway and signed off by two independent observers.',
   },
   {
-    n: '02',
-    h: 'Etched, not badged',
-    t: 'Your name and the date of the car’s first night run are laser cut into the sill — the only place the Ember will ever say who it belongs to.',
+    h: 'Etched into the sill',
+    t: 'Your name and the date of the car’s first night run are laser cut into the sill. It is the only place the Ember says who it belongs to.',
   },
   {
-    n: '03',
-    h: 'Closed, not paused',
+    h: 'Closed at ninety nine',
     t: 'At the ninety ninth car the tooling is destroyed in front of the owners. There is no continuation series, no revival, no hundredth.',
   },
 ]
 
 export default function DetailRows() {
   return (
-    <section className="mx-auto max-w-[1100px] px-[8vw] py-[clamp(5rem,11vh,9rem)]">
-      <p className="reveal-up mb-[clamp(2.5rem,6vh,4.5rem)] font-mono text-[0.7rem] uppercase tracking-[0.5em] text-accent">
+    <section className="wrap py-[clamp(5rem,11vh,9rem)]">
+      <h2 className="mb-[clamp(2.5rem,6vh,4.5rem)] font-display text-[clamp(2rem,4.5vw,3.75rem)] font-normal leading-[1.05]">
         The covenant
-      </p>
+      </h2>
       {rows.map((r) => (
         <div
-          key={r.n}
-          className="reveal-up grid grid-cols-[auto_1fr] items-baseline gap-[clamp(1.5rem,5vw,5rem)] border-t border-hairline py-[clamp(2rem,5vh,4rem)] md:grid-cols-[auto_0.9fr_1.1fr]"
+          key={r.h}
+          className="grid items-baseline gap-x-[clamp(1.5rem,5vw,5rem)] gap-y-4 border-t border-hairline py-[clamp(2rem,5vh,4rem)] md:grid-cols-[0.9fr_1.1fr]"
         >
-          <span className="font-display text-[clamp(1.4rem,2.4vw,2.2rem)] text-accent">{r.n}</span>
           <h3 className="font-display text-[clamp(1.6rem,3.4vw,2.8rem)] font-normal leading-[1.05]">{r.h}</h3>
-          <p className="col-start-2 max-w-[46ch] font-sans text-[1.05rem] text-muted md:col-start-3">{r.t}</p>
+          <p className="max-w-[46ch] font-sans text-[1.05rem] text-muted">{r.t}</p>
         </div>
       ))}
     </section>

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { usePrefersReducedMotion } from '../hooks'
 import VideoSources from './VideoSources'
 
 interface LazyVideoProps {
@@ -17,10 +18,12 @@ interface LazyVideoProps {
 // otherwise the browser still waits for the whole download before the 1st frame.
 export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
   const ref = useRef<HTMLVideoElement>(null)
+  const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
     const v = ref.current
-    if (!v) return
+    // Reduced motion: the poster stands in for the clip, nothing loads or plays.
+    if (!v || reduced) return
 
     const preBuffer = new IntersectionObserver(
       (entries) => {
@@ -54,7 +57,7 @@ export default function LazyVideo({ src, poster, className }: LazyVideoProps) {
     playback.observe(v)
 
     return () => { preBuffer.disconnect(); playback.disconnect(); }
-  }, [])
+  }, [reduced])
 
   return (
     <video

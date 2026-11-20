@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../anim'
+import { usePrefersReducedMotion } from '../hooks'
 import VideoSources from './VideoSources'
 
 const SRC_MP4 = 'assets/hero.mp4'
@@ -15,11 +16,18 @@ interface HeroProps { onReady?: () => void }
 export default function Hero({ onReady }: HeroProps) {
   const aRef = useRef<HTMLVideoElement>(null)
   const bRef = useRef<HTMLVideoElement>(null)
+  const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
     const a = aRef.current
     const b = bRef.current
     if (!a || !b) return
+
+    // Reduced motion: the poster is the hero. Nothing plays, so lift the loader now.
+    if (reduced) {
+      onReady?.()
+      return
+    }
 
     let active: HTMLVideoElement = a
     let idle: HTMLVideoElement = b
@@ -55,7 +63,7 @@ export default function Hero({ onReady }: HeroProps) {
     window.addEventListener('pointerdown', onTouch)
 
     return () => { cancelAnimationFrame(raf); window.removeEventListener('pointerdown', onTouch) }
-  }, [onReady])
+  }, [onReady, reduced])
 
   // Landscape footage in a portrait phone viewport: object-cover would zoom to
   // fill height and crop the car's length away. On portrait we switch the sharp
@@ -73,7 +81,7 @@ export default function Hero({ onReady }: HeroProps) {
         poster={POSTER}
         muted
         loop
-        autoPlay
+        autoPlay={!reduced}
         playsInline
         preload="metadata"
         aria-hidden
@@ -93,7 +101,7 @@ export default function Hero({ onReady }: HeroProps) {
 
       {/* soft dark contrast halo so the wordmark never washes out */}
       <div
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-10 bg-bg/25 portrait:bg-bg/45"
         style={{
           background:
             'radial-gradient(58% 68% at 50% 56%, oklch(0.11 0.01 50 / 0.74) 0%, oklch(0.11 0.01 50 / 0.32) 45%, oklch(0.11 0.01 50 / 0) 74%), linear-gradient(to bottom, oklch(0.13 0.01 50 / 0.5), oklch(0.13 0.01 50 / 0.08) 28%, oklch(0.13 0.01 50 / 0.1) 70%, oklch(0.13 0.01 50 / 0.75))',
@@ -106,15 +114,15 @@ export default function Hero({ onReady }: HeroProps) {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease }}
-            className="mb-6 pl-[0.5em] font-mono text-[clamp(0.7rem,1.2vw,0.95rem)] font-medium tracking-[0.62em] text-ink"
+            className="mb-6 pl-[0.4em] font-mono text-[clamp(0.75rem,1.2vw,0.95rem)] font-medium tracking-[0.4em] text-ink"
           >
-            NYXARA
+            NYXARA HYPERCAR
           </motion.p>
 
           {/* The wordmark resolves glyph by glyph from a soft clipped rise — the
               kind of theatrical entrance award launches use for the model name. */}
           <h1
-            aria-label="Ember"
+            aria-label="NYXARA Ember"
             className="flex justify-center font-display text-[clamp(4rem,21vw,17rem)] font-medium leading-[0.82] tracking-[-0.02em]"
           >
             {'EMBER'.split('').map((ch, i) => (
@@ -135,9 +143,9 @@ export default function Hero({ onReady }: HeroProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9, duration: 1 }}
-            className="mt-7 font-mono text-[0.72rem] uppercase tracking-[0.42em] text-muted"
+            className="mt-7 font-mono text-[0.8rem] uppercase tracking-[0.22em] text-ink/90 sm:tracking-[0.42em]"
           >
-            Ninety nine will <span className="text-accent ember-glow">burn</span>. No more.
+            Ninety nine will <span className="text-accent">burn</span>. No more.
           </motion.p>
         </div>
       </div>
@@ -148,11 +156,11 @@ export default function Hero({ onReady }: HeroProps) {
         transition={{ delay: 1.2, duration: 1 }}
         className="absolute bottom-[4vh] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3"
       >
-        <span className="font-mono text-[0.68rem] uppercase tracking-[0.36em] text-muted">Scroll</span>
+        <span className="font-mono text-[0.75rem] uppercase tracking-[0.36em] text-muted">Scroll</span>
         <motion.span
           aria-hidden
           className="block h-8 w-px bg-gradient-to-b from-accent to-transparent"
-          animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
+          animate={reduced ? undefined : { scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           style={{ transformOrigin: 'top' }}
         />

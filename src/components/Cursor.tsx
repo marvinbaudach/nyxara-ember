@@ -78,7 +78,6 @@ export default function Cursor() {
           marginLeft: -19,
           marginTop: -19,
           willChange: 'transform',
-          boxShadow: '0 0 24px oklch(0.685 0.19 45 / 0.45)',
         }}
         animate={{
           scale: active ? 1.9 : 1,

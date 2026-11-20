@@ -18,7 +18,7 @@
      amber accent hue (~50). Chroma tapers as L nears 0 or 1. One fire accent. */
   --bg:     oklch(0.155 0.012 50);   /* near black, warm */
   --ink:    oklch(0.940 0.008 70);   /* near white, warm, low chroma */
-  --muted:  oklch(0.685 0.018 50);   /* quiet warm grey — lifted for AA contrast */
+  --muted:  oklch(0.730 0.018 50);   /* warm grey, 7:1 on --bg for body copy */
   --accent: oklch(0.685 0.190 45);   /* glowing amber resin / fire */
 
   --bg-lift:  oklch(0.205 0.014 50);
@@ -27,6 +27,18 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+
+/* One content wrap for every section, so left and right edges line up. */
+@utility wrap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1200px;
+  padding-inline: clamp(1.25rem, 6vw, 4rem);
+}
+
+h1, h2, h3 { text-wrap: balance; }
+
+::selection { background: var(--accent); color: var(--bg); }
 
 /* Keyboard focus must stay visible even though the custom cursor hides the
    native pointer — mouse users get the cursor, keyboard users get the ring. */
@@ -57,7 +69,7 @@ body {
 }
 
 /* ── Filmic overlays (fixed, non-interactive, sit above everything) ─────────
-   Grain = animated noise; the vignette + faint scanlines add cinema texture. */
+   Grain = animated noise; the vignette darkens the frame edges. */
 .grain-layer {
   pointer-events: none;
   position: fixed;
@@ -73,9 +85,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 59;
-  background:
-    radial-gradient(130% 100% at 50% 50%, transparent 58%, oklch(0.10 0.01 50 / 0.55) 100%),
-    repeating-linear-gradient(0deg, transparent 0 2px, oklch(0 0 0 / 0.04) 2px 3px);
+  background: radial-gradient(130% 100% at 50% 50%, transparent 58%, oklch(0.10 0.01 50 / 0.55) 100%);
 }
 
 @keyframes grain-shift {
@@ -86,47 +96,17 @@ body {
   100% { transform: translate(5%, -2%); }
 }
 
-/* The accent breathes like a live coal — used on hero glyphs and key accents. */
-@keyframes ember-flicker {
-  0%, 100% { opacity: 1; text-shadow: 0 0 18px oklch(0.685 0.19 45 / 0.55), 0 0 60px oklch(0.685 0.19 45 / 0.25); }
-  45%      { opacity: 0.92; text-shadow: 0 0 10px oklch(0.685 0.19 45 / 0.40), 0 0 34px oklch(0.685 0.19 45 / 0.18); }
-  70%      { opacity: 0.98; text-shadow: 0 0 24px oklch(0.72 0.2 48 / 0.6), 0 0 80px oklch(0.685 0.19 45 / 0.3); }
-}
-.ember-glow { animation: ember-flicker 4.5s ease-in-out infinite; }
-
-/* Footer "build status" coal — a small live ember that breathes and casts a halo. */
-@keyframes dot-coal {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.685 0.19 45 / 0.55), 0 0 10px 2px oklch(0.685 0.19 45 / 0.45); opacity: 1; }
-  50%      { box-shadow: 0 0 0 6px oklch(0.685 0.19 45 / 0); opacity: 0.78; }
-}
-.dot-coal { animation: dot-coal 2.6s ease-in-out infinite; }
-
 @media (prefers-reduced-motion: reduce) {
   .grain-layer { animation: none; }
-  .ember-glow { animation: none; }
-  .dot-coal { animation: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
 }
 
-/* Turntable stage — a slow-breathing ember glow behind the transparent WebGL
-   canvas, so the car sits in a pool of warm light instead of a flat panel. */
+/* Turntable stage — a warm pool of light behind the footage, visible where the
+   clip is letterboxed on phones. */
 .ember-stage {
   background:
     radial-gradient(120% 90% at 50% 78%, oklch(0.30 0.10 48 / 0.55), transparent 60%),
     radial-gradient(140% 120% at 50% 30%, oklch(0.19 0.03 50), oklch(0.12 0.012 50) 70%);
-  animation: ember-breathe 9s ease-in-out infinite;
-}
-
-@keyframes ember-breathe {
-  0%, 100% { background-size: 100% 100%, 100% 100%; filter: brightness(1); }
-  50%      { background-size: 116% 108%, 100% 100%; filter: brightness(1.12); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ember-stage { animation: none; }
 }
 
 /* ── Native scroll-driven animations ───────────────────────────────────────

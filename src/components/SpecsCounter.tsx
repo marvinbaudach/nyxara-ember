@@ -38,34 +38,19 @@ const Counter = ({ spec, delay }: { spec: Spec; delay: number }) => {
 
 export default function SpecsCounter() {
   return (
-    <section className="relative px-[6vw] py-[clamp(6rem,14vh,14rem)]">
-      <motion.p
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, ease }}
-        className="mb-[clamp(2.5rem,6vh,5rem)] text-center font-mono text-[0.7rem] uppercase tracking-[0.5em] text-accent"
-      >
-        The numbers
-      </motion.p>
-      <div className="mx-auto grid max-w-[1300px] gap-[clamp(2.5rem,5vw,4rem)] md:grid-cols-4">
+    <section className="wrap pb-[clamp(6rem,14vh,12rem)]">
+      <h2 className="sr-only">Specifications</h2>
+      <div className="grid grid-cols-2 gap-x-[clamp(1.5rem,4vw,4rem)] gap-y-[clamp(2.5rem,5vw,4rem)] md:grid-cols-4">
         {specs.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: i * 0.08, ease }}
-            className="group relative border-t border-hairline pt-7 text-center md:text-left"
-          >
-            <div className="flex items-baseline justify-center gap-1.5 md:justify-start">
-              <span className="font-display text-[clamp(3.4rem,7vw,6rem)] font-medium leading-[0.9] tracking-[-0.02em] text-ink transition-colors duration-500 group-hover:text-accent">
+          <div key={s.label} className="border-t border-hairline pt-6">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-[clamp(3rem,6.4vw,5.5rem)] font-medium leading-[0.9] tracking-[-0.02em] text-ink">
                 <Counter spec={s} delay={i * 0.08} />
               </span>
               <span className="font-mono text-[clamp(0.85rem,1.4vw,1.1rem)] text-accent">{s.suffix}</span>
             </div>
-            <p className="mt-4 font-mono text-[0.7rem] uppercase tracking-[0.32em] text-muted">{s.label}</p>
-          </motion.div>
+            <p className="mt-4 font-mono text-[0.75rem] uppercase tracking-[0.2em] text-muted">{s.label}</p>
+          </div>
         ))}
       </div>
     </section>

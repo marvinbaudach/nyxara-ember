@@ -29,11 +29,12 @@ const CinematicOrbit = () => {
     return () => { io.disconnect(); }
   }, [])
 
-  // Touch devices (and reduced-motion) don't scrub: scroll-driven video seeking
+  // Touch devices don't scrub: scroll-driven video seeking
   // is too jittery on mobile decoders, and pinning the car through a tall track
   // forces a long, awkward scroll. Instead just loop the orbit clip gently —
   // play while the section is on screen, pause otherwise to save battery.
-  const autoplay = reducedMotion || coarse
+  // Reduced motion: neither loop nor scrub; the stage rests on the opening frame.
+  const autoplay = coarse && !reducedMotion
   useEffect(() => {
     const video = videoRef.current
     if (!video || !autoplay) return
@@ -48,7 +49,7 @@ const CinematicOrbit = () => {
   // once the previous one has reported `seeked`. That caps seeks at decoder
   // throughput (instead of 60/s) while still easing toward the scroll target.
   useEffect(() => {
-    if (!active || autoplay) return
+    if (!active || autoplay || reducedMotion) return
     const video = videoRef.current
     const track = trackRef.current
     if (!video || !track) return
@@ -96,13 +97,13 @@ const CinematicOrbit = () => {
       cancelAnimationFrame(raf)
       video.removeEventListener('seeked', onSeeked)
     }
-  }, [active, autoplay])
+  }, [active, autoplay, reducedMotion])
 
   return (
     <section
       ref={trackRef}
-      aria-label="Cinematic orbit — fly around the Ember"
-      className="relative z-50 h-dvh border-y border-hairline bg-bg md:h-[300vh]"
+      aria-label="Orbit view of the Ember"
+      className={`relative z-50 h-dvh border-y border-hairline bg-bg ${reducedMotion ? '' : 'md:h-[300vh]'}`}
     >
       {/* Sticky stage holds the viewport-filling clip while the tall track
           scrolls. dvh (not vh) so the mobile URL bar collapsing/expanding
@@ -127,25 +128,23 @@ const CinematicOrbit = () => {
           <VideoSources mp4={SRC_MP4} />
         </video>
 
-        {/* Vignette + heading overlaid on the footage. */}
+        {/* Edge vignette and a top scrim that keeps the heading legible on the
+            brightest frames of the clip. */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_50%,transparent_45%,oklch(0.12_0.012_50/0.85)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[55%] bg-gradient-to-b from-[oklch(0.12_0.012_50/0.85)] via-[oklch(0.12_0.012_50/0.5)] to-transparent" />
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto max-w-[1400px] px-6 pt-16 md:pt-24">
-          <p className="font-mono text-[0.7rem] uppercase tracking-[0.4em] text-accent">Turntable</p>
-          <h2 className="mt-3 font-display text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] text-ink">
+        <div className="wrap pointer-events-none absolute inset-x-0 top-0 pt-16 md:pt-24">
+          <h2 className="font-display text-[clamp(2rem,4.5vw,3.75rem)] leading-[1.05] text-ink">
             Every angle, <span className="text-accent">in your hands</span>
           </h2>
-          <p className="mt-4 max-w-xl font-sans text-[clamp(0.95rem,1.4vw,1.1rem)] text-muted">
-            Scroll to fly around the Ember — the camera circles under a field of
-            light, reflections pooling on the wet floor.
+          <p className="mt-4 max-w-xl font-sans text-[clamp(1rem,1.4vw,1.1rem)] text-ink/85">
+            {reducedMotion
+              ? 'The Ember under a field of light.'
+              : autoplay
+                ? 'The camera circles the Ember under a field of light.'
+                : 'Scroll and the camera circles the Ember under a field of light.'}
           </p>
         </div>
-
-        {!autoplay && (
-          <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-hairline bg-[oklch(0.205_0.014_50/0.7)] px-4 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.25em] text-muted backdrop-blur">
-            Scroll to orbit
-          </div>
-        )}
       </div>
     </section>
   )

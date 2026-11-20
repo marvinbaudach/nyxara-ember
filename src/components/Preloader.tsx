@@ -39,11 +39,11 @@ export default function Preloader() {
           on every tick. */}
       <div className="text-center" aria-hidden>
         <p className="pl-[0.5em] font-display text-[clamp(2rem,6vw,3.5rem)] tracking-[0.5em] text-ink">
-          NYX<span className="text-accent ember-glow">A</span>RA
+          NYX<span className="text-accent">A</span>RA
         </p>
         <div className="mx-auto mt-8 h-px w-56 overflow-hidden bg-hairline">
           <motion.div
-            className="h-full bg-gradient-to-r from-accent to-[oklch(0.78_0.2_55)]"
+            className="h-full bg-accent"
             style={{ width: `${pct}%` }}
           />
         </div>
